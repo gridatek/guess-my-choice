@@ -1,0 +1,56 @@
+{
+  "name": "guess-my-choice",
+  "version": "1.0.0",
+  "description": "Guess My Choice - 2-Player multiplayer game with Angular, Supabase, and realtime features",
+  "private": true,
+  "workspaces": [
+    "apps/frontend",
+    "apps/admin"
+  ],
+  "scripts": {
+    "dev": "supabase start",
+    "stop": "supabase stop",
+    "reset": "supabase db reset",
+    "seed": "supabase db reset",
+    "seed:users": "deno run --allow-net --allow-env supabase/seed-users.ts",
+    "migrate": "supabase db push --local",
+    "migrate:prod": "supabase db push",
+    "diff": "supabase db diff",
+    "status": "supabase status",
+    "logs": "docker logs supabase_db_angular-supabase --tail 100",
+    "shell": "supabase db shell",
+    "types": "supabase gen types typescript --local > types/database.types.ts",
+    "link": "supabase link",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "frontend:dev": "npm run start --workspace=apps/frontend",
+    "frontend:build": "npm run build --workspace=apps/frontend",
+    "frontend:test": "npm run test --workspace=apps/frontend",
+    "frontend:e2e": "npm run e2e --workspace=apps/frontend",
+    "admin:dev": "npm run start --workspace=apps/admin",
+    "admin:build": "npm run build --workspace=apps/admin",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "angular",
+    "supabase",
+    "multiplayer",
+    "game",
+    "realtime",
+    "2-player"
+  ],
+  "author": "",
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,json,css,scss,md,html}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
+    "prettier": "^3.6.2"
+  }
+}

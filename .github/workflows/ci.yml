@@ -1,0 +1,402 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        # TODO: Re-enable once docker/setup-docker-action is stable
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Log versions
+        shell: bash
+        run: |
+          echo "Node version: $(node --version)"
+          echo "npm version: $(npm --version)"
+          echo "Supabase CLI version: $(supabase --version)"
+          echo "Docker version: $(docker --version)"
+          echo "Deno version: $(deno --version)"
+
+      - run: npm run dev
+        shell: bash
+
+      - run: npm run status
+        shell: bash
+
+      - run: npm run migrate
+        shell: bash
+
+      - run: npm run diff
+        shell: bash
+
+      - run: npm run seed
+        shell: bash
+
+      - name: Seed users via Admin API for password compatibility
+        shell: bash
+        run: |
+          echo "Seeding test users via Admin API to ensure password compatibility..."
+          npm run seed:users
+
+      - name: Wait for services to be ready after reset
+        shell: bash
+        run: |
+          echo "Waiting for all services to stabilize after database reset..."
+          echo "Database reset restarts auth and other services, need to wait for them to be ready"
+          sleep 15
+
+          # Verify database is ready
+          echo "Checking database..."
+          docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT 1" >/dev/null || {
+            echo "❌ Database not responding"
+            exit 1
+          }
+          echo "✅ Database is ready"
+
+          # Verify auth service is responding
+          echo "Checking auth service health..."
+          for i in {1..10}; do
+            if curl -sf http://127.0.0.1:54321/auth/v1/health >/dev/null 2>&1; then
+              echo "✅ Auth service is healthy"
+              break
+            fi
+            if [ $i -eq 10 ]; then
+              echo "❌ Auth service not responding after 10 attempts"
+              docker logs supabase_auth_angular-supabase --tail 50
+              exit 1
+            fi
+            echo "Waiting for auth service... attempt $i/10"
+            sleep 3
+          done
+
+          # Verify seeded users exist and can be queried
+          echo "Verifying seeded data..."
+          USER_COUNT=$(docker exec supabase_db_angular-supabase psql -U postgres -d postgres -t -c "SELECT COUNT(*) FROM auth.users WHERE email LIKE '%@example.com'")
+          echo "Found $USER_COUNT test users"
+          if [ "$USER_COUNT" -lt 3 ]; then
+            echo "❌ Expected at least 3 test users, found $USER_COUNT"
+            exit 1
+          fi
+          echo "✅ All services ready and data seeded"
+
+      - name: Deploy and verify Edge Functions
+        shell: bash
+        run: |
+          echo "Checking Edge Functions setup..."
+          ls -la supabase/functions/
+
+          # In modern Supabase CLI, functions should be auto-served by 'supabase start'
+          # However, let's verify the edge-runtime container is running
+          echo ""
+          echo "Checking if edge-runtime is running..."
+          docker ps | grep edge-runtime || echo "⚠️  edge-runtime container not found"
+
+          # Check Supabase status for functions
+          echo ""
+          echo "Supabase status:"
+          supabase status
+
+          echo ""
+          echo "Waiting 10 seconds for Edge Functions to initialize..."
+          sleep 10
+
+      - name: Debug - Check seeded data
+        shell: bash
+        run: |
+          echo "Checking seeded users and profiles..."
+          STATUS_OUTPUT=$(supabase status)
+
+          API_URL=$(echo "$STATUS_OUTPUT" | grep -i "API URL" | head -n1 | awk '{print $NF}')
+          ANON_KEY=$(echo "$STATUS_OUTPUT" | grep -i "anon key\|publishable" | head -n1 | awk '{print $NF}')
+
+          # Fallback
+          if [ -z "$API_URL" ]; then
+            API_URL="http://127.0.0.1:54321"
+          fi
+
+          echo "API_URL: $API_URL"
+          echo "ANON_KEY length: ${#ANON_KEY}"
+
+          echo "Checking auth.users count..."
+          docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT COUNT(*) as user_count FROM auth.users WHERE email LIKE '%@example.com';" || echo "Failed to query auth.users"
+
+          echo "Checking profiles..."
+          curl -s -H "apikey: $ANON_KEY" "$API_URL/rest/v1/profiles?select=username,is_admin" | jq '.' || echo "Failed to query profiles"
+
+          echo "Checking auth.users details (email, confirmed, encrypted_password)..."
+          docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT id, email, email_confirmed_at, encrypted_password IS NOT NULL as has_password, is_sso_user FROM auth.users WHERE email LIKE '%@example.com';" || echo "Failed to query user details"
+
+          echo "Testing login manually..."
+          LOGIN_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST "$API_URL/auth/v1/token?grant_type=password" \
+            -H "apikey: $ANON_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"alice@example.com","password":"password123"}')
+
+          echo "Login response:"
+          echo "$LOGIN_RESPONSE" | head -n -1 | jq '.' || echo "$LOGIN_RESPONSE" | head -n -1
+          echo "HTTP Status: $(echo "$LOGIN_RESPONSE" | tail -n 1 | cut -d: -f2)"
+
+      - name: Verify Edge Functions are ready
+        shell: bash
+        run: |
+          echo "Verifying Edge Functions endpoint..."
+          # Edge Functions are automatically served by 'supabase start' (via npm run dev)
+          # Test the actual admin-create-user function
+
+          for i in {1..10}; do
+            RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://127.0.0.1:54321/functions/v1/admin-create-user \
+              -H "Content-Type: application/json" \
+              -d '{}' 2>&1)
+
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n 1 | cut -d: -f2)
+
+            if [ "$HTTP_CODE" == "401" ] || [ "$HTTP_CODE" == "400" ] || [ "$HTTP_CODE" == "403" ]; then
+              echo "✅ Edge Functions endpoint is accessible (HTTP $HTTP_CODE - expected for unauthenticated request)"
+              break
+            fi
+
+            if [ $i -eq 10 ]; then
+              echo "❌ Edge Functions endpoint not responding after 10 attempts"
+              echo "Last response:"
+              echo "$RESPONSE" | head -n -1
+              echo "HTTP Code: $HTTP_CODE"
+              exit 1
+            else
+              echo "Checking Edge Functions endpoint... attempt $i/10 (HTTP $HTTP_CODE)"
+              sleep 3
+            fi
+          done
+
+          echo ""
+          echo "Verifying posts Edge Functions..."
+
+          # Test posts-create function
+          POSTS_CREATE_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://127.0.0.1:54321/functions/v1/posts-create \
+            -H "Content-Type: application/json" \
+            -d '{}' 2>&1)
+          POSTS_CREATE_CODE=$(echo "$POSTS_CREATE_RESPONSE" | tail -n 1 | cut -d: -f2)
+
+          if [ "$POSTS_CREATE_CODE" == "401" ] || [ "$POSTS_CREATE_CODE" == "400" ]; then
+            echo "✅ posts-create function is accessible (HTTP $POSTS_CREATE_CODE)"
+          else
+            echo "⚠️  posts-create function returned unexpected code: $POSTS_CREATE_CODE"
+            echo "$POSTS_CREATE_RESPONSE" | head -n -1
+          fi
+
+          # Test posts-update function
+          POSTS_UPDATE_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://127.0.0.1:54321/functions/v1/posts-update \
+            -H "Content-Type: application/json" \
+            -d '{}' 2>&1)
+          POSTS_UPDATE_CODE=$(echo "$POSTS_UPDATE_RESPONSE" | tail -n 1 | cut -d: -f2)
+
+          if [ "$POSTS_UPDATE_CODE" == "401" ] || [ "$POSTS_UPDATE_CODE" == "400" ]; then
+            echo "✅ posts-update function is accessible (HTTP $POSTS_UPDATE_CODE)"
+          else
+            echo "⚠️  posts-update function returned unexpected code: $POSTS_UPDATE_CODE"
+            echo "$POSTS_UPDATE_RESPONSE" | head -n -1
+          fi
+
+      - name: Test Edge Functions
+        shell: bash
+        run: |
+          # Get API keys from supabase status with better parsing
+          echo "Getting configuration from Supabase..."
+          STATUS_OUTPUT=$(supabase status)
+          echo "$STATUS_OUTPUT"
+          echo ""
+
+          # Extract values using different methods for reliability
+          export SUPABASE_URL=$(echo "$STATUS_OUTPUT" | grep -i "API URL" | head -n1 | awk '{print $NF}')
+          export SUPABASE_ANON_KEY=$(echo "$STATUS_OUTPUT" | grep -i "anon key\|publishable" | head -n1 | awk '{print $NF}')
+
+          # Fallback: try direct format
+          if [ -z "$SUPABASE_URL" ]; then
+            export SUPABASE_URL="http://127.0.0.1:54321"
+          fi
+
+          echo "Testing Edge Functions..."
+          echo "SUPABASE_URL: $SUPABASE_URL"
+          echo "SUPABASE_ANON_KEY length: ${#SUPABASE_ANON_KEY}"
+
+          # Verify we got the API key
+          if [ -z "$SUPABASE_ANON_KEY" ] || [ ${#SUPABASE_ANON_KEY} -lt 20 ]; then
+            echo "❌ Failed to get valid SUPABASE_ANON_KEY from status"
+            echo "Status output was:"
+            echo "$STATUS_OUTPUT"
+            exit 1
+          fi
+
+          echo "✅ Environment configured, running tests..."
+          echo ""
+          echo "=========================================="
+          echo "Starting Edge Functions Tests"
+          echo "=========================================="
+          echo ""
+
+          # Run tests with full output
+          deno run --allow-net --allow-env supabase/functions/test-functions.ts 2>&1 || TEST_EXIT_CODE=$?
+
+          echo ""
+          echo "=========================================="
+          echo "Test execution completed with exit code: ${TEST_EXIT_CODE:-0}"
+          echo "=========================================="
+
+          if [ ! -z "$TEST_EXIT_CODE" ] && [ "$TEST_EXIT_CODE" != "0" ]; then
+            echo ""
+            echo "Tests failed, checking database state..."
+            docker exec supabase_db_angular-supabase psql -U postgres -d postgres -c "SELECT email, created_at, email_confirmed_at FROM auth.users WHERE email LIKE '%@example.com';" || echo "Could not query auth.users"
+            echo ""
+            echo "Checking auth logs..."
+            docker logs supabase_auth_angular-supabase 2>&1 | tail -50
+            echo ""
+            echo "Checking edge-runtime logs..."
+            docker logs $(docker ps -q -f name=edge-runtime) 2>&1 | tail -50 || echo "No edge-runtime logs available"
+            exit $TEST_EXIT_CODE
+          fi
+
+      # Optional: Test database and services health (remove if not needed)
+      - name: Test database connection and data
+        shell: bash
+        run: |
+          # Get the API URL and key
+          API_URL=$(supabase status | grep "API URL" | awk '{print $3}')
+          ANON_KEY=$(supabase status | grep "Publishable key" | awk '{print $3}')
+
+          # Test API is responding
+          echo "Testing API endpoint..."
+          curl -f -H "apikey: $ANON_KEY" "$API_URL/rest/v1/" || exit 1
+
+          # Test database has tables (check if profiles table exists)
+          echo "Testing database tables..."
+          curl -f -H "apikey: $ANON_KEY" "$API_URL/rest/v1/profiles?select=count" || exit 1
+
+          echo "✅ All services responding and database accessible"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          echo "Installing all dependencies (root + workspaces)..."
+          npm install
+
+      - name: Install Playwright browsers
+        shell: bash
+        run: |
+          echo "Installing Playwright browsers and system dependencies..."
+          cd frontend
+          npx playwright install --with-deps chromium
+
+      - name: Generate frontend config
+        shell: bash
+        run: |
+          echo "Generating config.json with Supabase credentials..."
+          STATUS_OUTPUT=$(supabase status)
+
+          # Extract values
+          API_URL=$(echo "$STATUS_OUTPUT" | grep -i "API URL" | head -n1 | awk '{print $NF}')
+          ANON_KEY=$(echo "$STATUS_OUTPUT" | grep -i "anon key\|publishable" | head -n1 | awk '{print $NF}')
+
+          # Fallback
+          if [ -z "$API_URL" ]; then
+            API_URL="http://127.0.0.1:54321"
+          fi
+
+          # Create config.json
+          cat > frontend/public/config.json <<EOF
+          {
+            "supabase": {
+              "url": "$API_URL",
+              "anonKey": "$ANON_KEY"
+            }
+          }
+          EOF
+
+          echo "✅ Generated frontend/public/config.json"
+          cat frontend/public/config.json
+
+      - name: Run frontend E2E tests
+        shell: bash
+        run: |
+          echo "=========================================="
+          echo "Running Frontend E2E Tests with Playwright"
+          echo "=========================================="
+          echo ""
+          cd frontend
+
+          # Run E2E tests
+          npm run e2e || E2E_EXIT_CODE=$?
+
+          echo ""
+          echo "=========================================="
+          echo "E2E test execution completed with exit code: ${E2E_EXIT_CODE:-0}"
+          echo "=========================================="
+
+          if [ ! -z "$E2E_EXIT_CODE" ] && [ "$E2E_EXIT_CODE" != "0" ]; then
+            echo ""
+            echo "E2E tests failed. Test report available in artifacts."
+            exit $E2E_EXIT_CODE
+          fi
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-test-results
+          path: frontend/test-results/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Show logs on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "=========================================="
+          echo "Showing Supabase container logs..."
+          echo "=========================================="
+          echo ""
+          echo "--- Database Logs (last 100 lines) ---"
+          docker logs supabase_db_angular-supabase --tail 100 2>&1 || echo "Could not fetch database logs"
+          echo ""
+          echo "--- Kong API Gateway Logs (last 50 lines) ---"
+          docker logs supabase_kong_angular-supabase --tail 50 2>&1 || echo "Could not fetch API gateway logs"
+          echo ""
+          echo "--- Auth GoTrue Logs (last 50 lines) ---"
+          docker logs supabase_auth_angular-supabase --tail 50 2>&1 || echo "Could not fetch auth logs"
+          echo ""
+          echo "=========================================="
+
+      - run: npm run stop
+        if: always()
+        shell: bash
