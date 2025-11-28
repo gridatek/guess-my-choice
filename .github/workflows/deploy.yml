@@ -19,13 +19,17 @@ jobs:
         with:
           node-version: '20'
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
 
       - run: supabase link --project-ref $PROJECT_ID
 
-      - run: npm run migrate:prod
+      - run: pnpm run migrate:prod
 
       - run: |
           curl -f https://$PROJECT_ID.supabase.co/rest/v1/ || exit 1
