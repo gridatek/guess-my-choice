@@ -1,2 +1,38 @@
 packages:
-  - 'apps/*'
+  - "apps/*"
+  - "libs/*"
+
+catalogs:
+  angular:
+    # --- Core Framework (v21) ---
+    "@angular/animations": "^21.0.0"
+    "@angular/common": "^21.0.0"
+    "@angular/compiler": "^21.0.0"
+    "@angular/core": "^21.0.0"
+    "@angular/forms": "^21.0.0"
+    "@angular/platform-browser": "^21.0.0"
+    "@angular/router": "^21.0.0"
+
+    # --- Tooling & CLI (v21) ---
+    "@angular/cli": "^21.0.0"
+    "@angular/compiler-cli": "^21.0.0"
+    "@angular/build": "^21.0.0"
+    
+    # --- New in v21 (Optional) ---
+    # Angular Aria (Headless primitives, Developer Preview)
+    "@angular/aria": "^21.0.0" 
+    "@angular/cdk": "^21.0.0" 
+
+    # --- Dependencies ---
+    # Angular 21 supports TypeScript 5.7
+    "typescript": "~5.9.2"
+    "rxjs": "~7.8.2"
+    "tslib": "^2.8.0"
+  supabase: 
+    "@supabase/supabase-js": "^2.83.0"
+  tailwind:
+    "tailwindcss": "^4.1.12"
+    "postcss": "^8.5.3"
+    "@tailwindcss/postcss": "^4.1.12"
+  playwright:
+    "@playwright/test": "^1.56.1"
