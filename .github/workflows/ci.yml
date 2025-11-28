@@ -23,6 +23,10 @@ jobs:
         with:
           node-version: '20'
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
@@ -274,7 +278,7 @@ jobs:
         shell: bash
         run: |
           echo "Installing all dependencies (root + workspaces)..."
-          npm install
+          pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         shell: bash

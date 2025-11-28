@@ -1,254 +1,140 @@
-# Angular + Supabase Full-Stack Application
+# Guess My Choice – 2-Player Game Project
+
+## **Project Overview**
+
+**Guess My Choice** is a **turn-based, 2-player multiplayer game** for web and mobile where players create a real connection through interactive gameplay. The game is designed for **friends, couples, or adult sessions**.
+
+- **Players:** 2 (Player 1 and Player 2)  
+- **Platforms:**  
+  - **Web:** Angular  
+  - **Mobile:** Kotlin Multiplatform (KMP)  
+- **Backend & Realtime:** Supabase (Database + Realtime + Authentication)  
+- **AI Integration:** Dynamic question generation and adaptive gameplay
+
+**Core Idea:**  
+- Player 1 secretly chooses an option from a set of **AI-generated choices**.  
+- Player 2 tries to guess Player 1’s choice.  
+- AI analyzes previous rounds and optional **player feedback** to **adapt the next set of options** and make the game fun, engaging, and personalized.  
+- Connection points are tracked and influence the outcome.
+
+---
+
+## **Key Features**
+
+1. **Dynamic Gameplay**  
+   - AI generates options/questions each round  
+   - Adaptive difficulty and variety based on player behavior and feedback
+
+2. **Session Types**  
+   - **Friends:** Casual and funny options  
+   - **Couple:** Romantic and intimate options  
+   - **Adult/Sex:** Risqué, flirty, or sexual-themed options
+
+3. **2-Player Multiplayer Support**  
+   - Players join via a session code or link  
+   - Realtime updates using Supabase Realtime
+
+4. **Optional Feedback System**  
+   - After each round, players can optionally provide feedback on:  
+     - Whether they liked the question  
+     - What type of next question they want (fun, flirty, challenging, etc.)  
+   - Feedback is stored and used by AI to **personalize the next round**
+
+5. **Replayability**  
+   - AI generates new options for every round  
+   - Multiple rounds per session  
+   - Personalized experiences evolve based on player feedback
+
+6. **Connection Points System**  
+   - Correct guesses increase points  
+   - AI can adjust difficulty or humor dynamically
+
+---
+
+## **Game Flow**
+
+1. Player 1 **creates a game session** → selects session type (friends, couple, adult)  
+2. AI **generates first round of options**  
+3. Player 1 secretly selects an option  
+4. Player 2 joins and guesses Player 1’s choice  
+5. Connection points are updated  
+6. **Optional Feedback Step:**  
+   - Players may provide feedback on the round  
+7. AI analyzes round results + optional feedback → generates next round options  
+8. Repeat until game ends → final **connection score determines outcome**
+
+---
+
+## **Database Schema**
+
+### **1. `game_sessions` Table**
+| Column               | Type       | Description                                                   |
+|---------------------|------------|---------------------------------------------------------------|
+| `id`                | UUID       | Primary key                                                   |
+| `player1_id`        | UUID       | Auth ID of Player 1                                           |
+| `player2_id`        | UUID       | Auth ID of Player 2                                           |
+| `session_type`      | TEXT       | `friends` / `couple` / `adult`                                |
+| `connection_points` | INTEGER    | Total points based on correct guesses                         |
+| `status`            | TEXT       | `waiting` / `active` / `finished`                             |
+| `current_round`     | INTEGER    | Tracks the current round                                       |
+| `created_at`        | TIMESTAMP  | Default `now()`                                               |
+
+---
+
+### **2. `game_options` Table**
+| Column           | Type     | Description                                       |
+|-----------------|----------|---------------------------------------------------|
+| `id`            | UUID     | Primary key                                       |
+| `game_session_id`| UUID     | Foreign key → `game_sessions.id`                 |
+| `round_number`  | INTEGER  | Track round number                                |
+| `option_name`   | TEXT     | AI-generated option (activity, hobby, or question)|
+| `is_selected`   | BOOLEAN  | True if Player 1 selected this option            |
+| `player2_guess` | TEXT     | Player 2’s guess for this round                  |
+| `ai_note`       | TEXT     | Optional AI reasoning for next question          |
+| `player1_feedback` | TEXT  | Optional feedback from Player 1 about this round|
+| `player2_feedback` | TEXT  | Optional feedback from Player 2 about this round|
+
+---
+
+### **3. `options_pool` Table** (Optional)
+| Column | Type  | Description                |
+|--------|-------|----------------------------|
+| `id`   | UUID  | Primary key                |
+| `name` | TEXT  | Option name (hobby/activity/etc.) |
 
-## Project Structure
+**Notes:**  
+- AI can generate options entirely or select from `options_pool`  
+- Feedback fields are optional → skipped if players choose not to provide input
 
-```
-project/
-├── .github/
-│   └── workflows/        # CI/CD workflows
-├── supabase/
-│   ├── functions/        # Edge Functions (Deno)
-│   │   ├── admin-create-user/
-│   │   ├── admin-list-users/
-│   │   ├── admin-update-user/
-│   │   ├── admin-delete-user/
-│   │   ├── import_map.json
-│   │   └── test-functions.ts
-│   ├── migrations/       # Database migrations (00000-00006)
-│   ├── seed.sql          # Seed data with proper auth schema
-│   └── config.toml       # Supabase configuration
-├── package.json          # npm scripts
-├── CLAUDE.md             # AI assistant guidance
-├── .gitignore
-└── README.md
-```
+---
 
-## Quick Start Guide
+## **AI Integration**
 
-### Prerequisites
+- **Purpose:** Generate dynamic, adaptive options and questions  
+- **Analysis:** AI reviews:
+  - Previous selections by Player 1  
+  - Previous guesses by Player 2  
+  - Connection points  
+  - Optional feedback from both players
 
-- [Docker Desktop](https://docs.docker.com/desktop/) installed and running (required for local
-  development)
-- Node.js 18+ and npm
-- **Note**: GitHub Actions automatically sets up Docker on all platforms (Ubuntu, Windows, macOS)
+- **Next Round Generation:**  
+  - Creates new option set based on analysis and session type  
+  - Ensures game is fun, challenging, or surprising
 
-### Start in 3 Commands
+- **Session Type Influence:**  
+  - Friends → humorous or casual  
+  - Couple → romantic or personal  
+  
+  - Adult → flirty or sexual
 
-```bash
-git clone <repository-url>
-cd angular-supabase
-npm install  # Install dependencies (uses npm workspaces)
-npm run dev  # Start Supabase backend
+---
 
-# Start frontend (in another terminal)
-npm run frontend:dev
-# Or: cd frontend && npm start
+## **Advantages**
 
-# That's it! Backend and frontend are running
-```
+- **Dynamic & Replayable:** Fresh options every round  
+- **Adaptive Gameplay:** AI personalizes rounds for each session  
+- **Optional Player Feedback:** Players guide the AI for a tailored experience  
+- **Audience-Specific:** Session type ensures appropriate content  
+- **2-Player Multiplayer & Realtime:** Seamless interaction  
+- **Cross-Platform:** Works on Angular web and KMP mobile
 
-### Seed Test Data
-
-```bash
-# Reset database and load seed data (test users & posts)
-npm run seed
-```
-
-**Test Users:**
-
-- `alice@example.com` / `password123` (Admin user)
-- `bob@example.com` / `password123` (Regular user)
-- `carol@example.com` / `password123` (Regular user)
-
-**Features:**
-
-- ✅ Passwords hashed with PostgreSQL `crypt()` + bcrypt
-- ✅ All GoTrue auth columns properly configured
-- ✅ Email auto-confirmed, ready to login immediately
-- ✅ Admin permissions set for alice (can use Edge Functions)
-- ✅ Git hooks for automatic code formatting and commit message linting
-
-## Development Commands
-
-All commands work on Windows, Mac, and Linux:
-
-```bash
-# Start Supabase locally
-npm run dev
-
-# Stop Supabase
-npm run stop
-
-# Reset database (drops all data and re-runs migrations)
-npm run reset
-
-# Apply migrations locally
-npm run migrate
-
-# Apply migrations to production
-npm run migrate:prod
-
-# View database diff
-npm run diff
-
-# Check service status
-npm run status
-
-# View logs
-npm run logs
-
-# Open database shell
-npm run shell
-
-# Generate TypeScript types
-npm run types
-
-# Link to production project
-npm run link
-
-# Seed test data (users & posts)
-npm run seed
-```
-
-## Service Endpoints
-
-Once running (`npm run dev`), services are available at:
-
-- **API Gateway**: http://localhost:54321 (all services route through here)
-- **Edge Functions**: http://localhost:54321/functions/v1/
-- **Database**: Check `npm run status` for connection string (port 54322)
-- **Studio UI**: http://localhost:54323
-- **Email UI (Inbucket)**: http://localhost:54324
-
-## Edge Functions
-
-This template includes **admin API functions** built with Deno:
-
-- **admin-create-user** - Create new users (requires admin)
-- **admin-list-users** - List all users (requires admin)
-- **admin-update-user** - Update user profiles (requires admin)
-- **admin-delete-user** - Delete users (requires admin)
-
-**Testing Edge Functions:**
-
-```bash
-# The test suite is automatically run in CI
-# To run manually (requires Supabase running):
-deno run --allow-net --allow-env supabase/functions/test-functions.ts
-```
-
-All functions:
-
-- Require Bearer token authentication
-- Verify admin role via `profiles.is_admin`
-- Return JSON with CORS headers
-- Auto-served by `supabase start`
-
-## CI/CD Workflows
-
-### Main CI (`ci.yml`)
-
-**Runs on:** `ubuntu-latest` (Docker pre-installed)
-
-**Comprehensive testing pipeline:**
-
-1. ✅ Sets up Node.js 20, Supabase CLI, and Deno
-2. ✅ Starts all Supabase services
-3. ✅ Applies database migrations
-4. ✅ Seeds test data with proper auth schema
-5. ✅ **Waits for services** - 15s + health checks
-6. ✅ Verifies auth service is ready (10 retries, 3s intervals)
-7. ✅ Confirms seeded users exist in database
-8. ✅ Tests Edge Functions endpoint accessibility
-9. ✅ **Runs Edge Functions test suite** with Deno
-10. ✅ Validates admin authentication and permissions
-11. ✅ Shows comprehensive logs on failure
-
-**Key improvements:**
-
-- Robust environment variable parsing (case-insensitive, fallbacks)
-- Service health checks prevent race conditions
-- Auth service readiness verification after `db reset`
-- Edge Functions auto-served and tested
-- Detailed error diagnostics with auth/edge-runtime logs
-
-**Test Coverage:**
-
-- ✅ Database schema (migrations)
-- ✅ Authentication (login with seeded users)
-- ✅ Edge Functions (all admin endpoints)
-- ✅ Security (unauthorized/non-admin access prevention)
-- ✅ Data integrity (profiles, posts, follows)
-
-### Deployment (`deploy.yml`)
-
-- Manual trigger only
-- Deploys migrations to production
-- Requires `SUPABASE_ACCESS_TOKEN` and `PROJECT_ID`
-
-## Architecture
-
-This setup uses Supabase CLI which automatically manages:
-
-- **PostgreSQL** - Database with extensions
-- **PostgREST** - Auto-generated REST API
-- **GoTrue** - Authentication service
-- **Realtime** - Real-time subscriptions
-- **Storage** - File storage service
-- **Kong** - API gateway
-
-## Best Practices
-
-### Migrations
-
-- Use 5-digit sequential numbering (00000, 00001, 00002, etc.)
-- Test locally with `npm run reset` before production
-- Always enable Row Level Security (RLS) on tables
-- Use `npm run diff` to check changes before applying
-
-### Development
-
-- Run `npm run status` to check all services
-- Use `npm run logs` to debug issues
-- Generate TypeScript types with `npm run types`
-- Link to production with `npm run link`
-
-## What You Get
-
-✅ **Cross-platform**: Works on Windows, Mac, and Linux ✅ **Docker-based**: Local development with
-all Supabase services ✅ **Version-controlled migrations**: 7 migrations tracking schema evolution
-✅ **Proper auth schema**: All GoTrue columns configured correctly ✅ **Edge Functions**: Admin API
-with Deno + comprehensive tests ✅ **Seed data**: Test users with bcrypt passwords, ready to login
-✅ **Robust CI/CD**: Health checks, service verification, error diagnostics ✅ **Production ready**:
-Deploy migrations with one command ✅ **Admin system**: Role-based access control with `is_admin`
-flag ✅ **Battle-tested**: All CI issues resolved, fully passing tests
-
-## Troubleshooting
-
-### Authentication Issues
-
-If login fails with "Invalid credentials":
-
-- Run `npm run seed` to recreate users with proper password hashing
-- Verify `pgcrypto` extension is enabled
-- Check auth.users columns are non-NULL (see CLAUDE.md)
-
-### CI/CD Issues
-
-If GitHub Actions fails:
-
-- Check auth service logs in workflow output
-- Verify Edge Functions are in `supabase/functions/`
-- Ensure Deno is set up (auto-handled by workflow)
-- Review comprehensive error logs in failed step
-
-### Edge Functions Issues
-
-If functions don't respond:
-
-- Ensure Deno is installed: `deno --version`
-- Check import_map.json exists
-- Functions auto-serve with `supabase start`
-- Test: `curl http://localhost:54321/functions/v1/admin-create-user`
-
-For more details, see **[CLAUDE.md](./CLAUDE.md)** (AI assistant guidance with full troubleshooting)

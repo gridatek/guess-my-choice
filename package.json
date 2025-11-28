@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Guess My Choice - 2-Player multiplayer game with Angular, Supabase, and realtime features",
   "private": true,
-  "workspaces": [
-    "apps/frontend",
-    "apps/admin"
-  ],
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "supabase start",
     "stop": "supabase stop",
@@ -23,12 +20,12 @@
     "link": "supabase link",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "frontend:dev": "npm run start --workspace=apps/frontend",
-    "frontend:build": "npm run build --workspace=apps/frontend",
-    "frontend:test": "npm run test --workspace=apps/frontend",
-    "frontend:e2e": "npm run e2e --workspace=apps/frontend",
-    "admin:dev": "npm run start --workspace=apps/admin",
-    "admin:build": "npm run build --workspace=apps/admin",
+    "frontend:dev": "pnpm --filter @guess-my-choice/frontend dev",
+    "frontend:build": "pnpm --filter @guess-my-choice/frontend build",
+    "frontend:test": "pnpm --filter @guess-my-choice/frontend test",
+    "frontend:e2e": "pnpm --filter @guess-my-choice/frontend e2e",
+    "admin:dev": "pnpm --filter @guess-my-choice/admin dev",
+    "admin:build": "pnpm --filter @guess-my-choice/admin build",
     "prepare": "husky"
   },
   "keywords": [
@@ -52,5 +49,30 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2"
+  },
+  "pnpm": {
+    "catalogs": {
+      "default": {
+        "@angular/aria": "^21.0.1",
+        "@angular/build": "^21.0.0",
+        "@angular/cdk": "^21.0.1",
+        "@angular/cli": "^21.0.0",
+        "@angular/common": "^21.0.0",
+        "@angular/compiler": "^21.0.0",
+        "@angular/compiler-cli": "^21.0.0",
+        "@angular/core": "^21.0.0",
+        "@angular/forms": "^21.0.0",
+        "@angular/platform-browser": "^21.0.0",
+        "@angular/router": "^21.0.0",
+        "@playwright/test": "^1.56.1",
+        "@supabase/supabase-js": "^2.83.0",
+        "@tailwindcss/postcss": "^4.1.12",
+        "postcss": "^8.5.3",
+        "rxjs": "~7.8.2",
+        "tailwindcss": "^4.1.12",
+        "tslib": "^2.8.1",
+        "typescript": "~5.9.2"
+      }
+    }
   }
 }
