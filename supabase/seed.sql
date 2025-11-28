@@ -248,6 +248,41 @@ INSERT INTO public.option_category_assignments (option_id, option_category_id) V
 ON CONFLICT DO NOTHING;
 
 -- ============================================
+-- SEED QUESTIONS (prompts for game rounds)
+-- ============================================
+
+INSERT INTO public.questions (
+    id,
+    user_id,
+    question_text,
+    description,
+    session_type,
+    status,
+    tags
+) VALUES
+    -- Friends session type questions
+    ('q0000001-0000-0000-0000-000000000001'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would I prefer to do this weekend?', 'Casual activity preference', 'friends', 'published', ARRAY['weekend', 'activity']),
+    ('q0000002-0000-0000-0000-000000000002'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like to spend a free evening?', 'Evening plans', 'friends', 'published', ARRAY['evening', 'relaxation']),
+    ('q0000003-0000-0000-0000-000000000003'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What kind of adventure sounds fun to me?', 'Adventure preference', 'friends', 'published', ARRAY['adventure', 'excitement']),
+    ('q0000004-0000-0000-0000-000000000004'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make me happiest right now?', 'Current mood', 'friends', 'published', ARRAY['mood', 'happiness']),
+    ('q0000005-0000-0000-0000-000000000005'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Which activity would I choose for us?', 'Group activity', 'friends', 'published', ARRAY['group', 'bonding']),
+
+    -- Couple session type questions
+    ('q0000006-0000-0000-0000-000000000006'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What romantic gesture would I appreciate most?', 'Romance preference', 'couple', 'published', ARRAY['romance', 'gestures']),
+    ('q0000007-0000-0000-0000-000000000007'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like us to spend quality time together?', 'Quality time ideas', 'couple', 'published', ARRAY['quality-time', 'togetherness']),
+    ('q0000008-0000-0000-0000-000000000008'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make our next date special?', 'Date ideas', 'couple', 'published', ARRAY['date', 'special']),
+    ('q0000009-0000-0000-0000-000000000009'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would help us connect deeper?', 'Connection building', 'couple', 'published', ARRAY['connection', 'intimacy']),
+    ('q0000010-0000-0000-0000-000000000010'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What romantic activity am I craving?', 'Romantic desires', 'couple', 'published', ARRAY['romance', 'desire']),
+
+    -- Adult session type questions
+    ('q0000011-0000-0000-0000-000000000011'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would spice up our evening?', 'Evening excitement', 'adult', 'published', ARRAY['spicy', 'excitement']),
+    ('q0000012-0000-0000-0000-000000000012'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What intimate activity am I in the mood for?', 'Intimate preferences', 'adult', 'published', ARRAY['intimate', 'mood']),
+    ('q0000013-0000-0000-0000-000000000013'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make tonight unforgettable?', 'Memorable moments', 'adult', 'published', ARRAY['memorable', 'special']),
+    ('q0000014-0000-0000-0000-000000000014'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like to connect physically?', 'Physical connection', 'adult', 'published', ARRAY['physical', 'connection']),
+    ('q0000015-0000-0000-0000-000000000015'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What fantasy am I curious about?', 'Fantasy exploration', 'adult', 'published', ARRAY['fantasy', 'exploration'])
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================
 -- SEED SAMPLE GAME SESSION (for testing)
 -- ============================================
 
@@ -338,6 +373,7 @@ BEGIN
     RAISE NOTICE '   Users: %', (SELECT COUNT(*) FROM auth.users WHERE email LIKE '%@example.com');
     RAISE NOTICE '   Profiles: %', (SELECT COUNT(*) FROM public.profiles);
     RAISE NOTICE '   Game Options: %', (SELECT COUNT(*) FROM public.options);
+    RAISE NOTICE '   Questions: %', (SELECT COUNT(*) FROM public.questions);
     RAISE NOTICE '   Option Categories: %', (SELECT COUNT(*) FROM public.option_categories);
     RAISE NOTICE '   Game Sessions: %', (SELECT COUNT(*) FROM public.game_sessions);
     RAISE NOTICE '   Game Rounds: %', (SELECT COUNT(*) FROM public.game_rounds);

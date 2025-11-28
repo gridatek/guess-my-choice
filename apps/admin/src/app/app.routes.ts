@@ -32,20 +32,38 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'posts',
+    path: 'options',
     canActivate: [authGuard],
     children: [
       {
         path: '',
-        loadComponent: () => import('./posts/posts').then((m) => m.Posts),
+        loadComponent: () => import('./options/options').then((m) => m.Options),
       },
       {
         path: 'create',
-        loadComponent: () => import('./posts/post-form').then((m) => m.PostForm),
+        loadComponent: () => import('./options/option-form').then((m) => m.OptionForm),
       },
       {
         path: 'edit/:id',
-        loadComponent: () => import('./posts/post-form').then((m) => m.PostForm),
+        loadComponent: () => import('./options/option-form').then((m) => m.OptionForm),
+      },
+    ],
+  },
+  {
+    path: 'questions',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./questions/questions').then((m) => m.Questions),
+      },
+      {
+        path: 'create',
+        loadComponent: () => import('./questions/question-form').then((m) => m.QuestionForm),
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () => import('./questions/question-form').then((m) => m.QuestionForm),
       },
     ],
   },

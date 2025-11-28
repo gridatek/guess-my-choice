@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { PostService, Category } from '../services/post.service';
+import { OptionService, OptionCategory } from '../services/option.service';
 
 @Component({
   selector: 'app-categories',
@@ -153,7 +153,7 @@ import { PostService, Category } from '../services/post.service';
   styles: ``,
 })
 export class Categories implements OnInit {
-  categories = signal<Category[]>([]);
+  categories = signal<OptionCategory[]>([]);
   loading = signal(true);
   creating = signal(false);
   errorMessage = signal('');
@@ -163,7 +163,7 @@ export class Categories implements OnInit {
   newCategorySlug = '';
   newCategoryDescription = '';
 
-  constructor(private postService: PostService) {}
+  constructor(private optionService: OptionService) {}
 
   async ngOnInit() {
     await this.loadCategories();
@@ -174,7 +174,7 @@ export class Categories implements OnInit {
     this.errorMessage.set('');
 
     try {
-      const categories = await this.postService.getCategories();
+      const categories = await this.optionService.getCategories();
       this.categories.set(categories);
     } catch (error: any) {
       this.errorMessage.set(error.message || 'Failed to load categories');
@@ -194,7 +194,7 @@ export class Categories implements OnInit {
     this.successMessage.set('');
 
     try {
-      const newCategory = await this.postService.createCategory(
+      const newCategory = await this.optionService.createCategory(
         this.newCategoryName,
         this.newCategorySlug,
         this.newCategoryDescription || undefined
@@ -219,13 +219,13 @@ export class Categories implements OnInit {
     }
   }
 
-  async deleteCategory(category: Category) {
+  async deleteCategory(category: OptionCategory) {
     if (!confirm(`Are you sure you want to delete the category "${category.name}"?`)) {
       return;
     }
 
     try {
-      await this.postService.deleteCategory(category.id);
+      await this.optionService.deleteCategory(category.id);
       this.categories.set(this.categories().filter((c) => c.id !== category.id));
       this.successMessage.set('Category deleted successfully!');
 
