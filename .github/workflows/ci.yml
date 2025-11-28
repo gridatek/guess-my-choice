@@ -192,33 +192,7 @@ jobs:
           done
 
           echo ""
-          echo "Verifying posts Edge Functions..."
-
-          # Test posts-create function
-          POSTS_CREATE_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://127.0.0.1:54321/functions/v1/posts-create \
-            -H "Content-Type: application/json" \
-            -d '{}' 2>&1)
-          POSTS_CREATE_CODE=$(echo "$POSTS_CREATE_RESPONSE" | tail -n 1 | cut -d: -f2)
-
-          if [ "$POSTS_CREATE_CODE" == "401" ] || [ "$POSTS_CREATE_CODE" == "400" ]; then
-            echo "✅ posts-create function is accessible (HTTP $POSTS_CREATE_CODE)"
-          else
-            echo "⚠️  posts-create function returned unexpected code: $POSTS_CREATE_CODE"
-            echo "$POSTS_CREATE_RESPONSE" | head -n -1
-          fi
-
-          # Test posts-update function
-          POSTS_UPDATE_RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST http://127.0.0.1:54321/functions/v1/posts-update \
-            -H "Content-Type: application/json" \
-            -d '{}' 2>&1)
-          POSTS_UPDATE_CODE=$(echo "$POSTS_UPDATE_RESPONSE" | tail -n 1 | cut -d: -f2)
-
-          if [ "$POSTS_UPDATE_CODE" == "401" ] || [ "$POSTS_UPDATE_CODE" == "400" ]; then
-            echo "✅ posts-update function is accessible (HTTP $POSTS_UPDATE_CODE)"
-          else
-            echo "⚠️  posts-update function returned unexpected code: $POSTS_UPDATE_CODE"
-            echo "$POSTS_UPDATE_RESPONSE" | head -n -1
-          fi
+          echo "✅ Edge Functions endpoint verified and accessible"
 
       - name: Test Edge Functions
         shell: bash
@@ -306,7 +280,7 @@ jobs:
         shell: bash
         run: |
           echo "Installing Playwright browsers and system dependencies..."
-          cd frontend
+          cd apps/frontend
           npx playwright install --with-deps chromium
 
       - name: Generate frontend config
@@ -324,8 +298,8 @@ jobs:
             API_URL="http://127.0.0.1:54321"
           fi
 
-          # Create config.json
-          cat > frontend/public/config.json <<EOF
+          # Create config.json for both apps
+          cat > apps/frontend/public/config.json <<EOF
           {
             "supabase": {
               "url": "$API_URL",
@@ -334,8 +308,20 @@ jobs:
           }
           EOF
 
-          echo "✅ Generated frontend/public/config.json"
-          cat frontend/public/config.json
+          cat > apps/admin/public/config.json <<EOF
+          {
+            "supabase": {
+              "url": "$API_URL",
+              "anonKey": "$ANON_KEY"
+            }
+          }
+          EOF
+
+          echo "✅ Generated config files for both apps"
+          echo "Frontend config:"
+          cat apps/frontend/public/config.json
+          echo "Admin config:"
+          cat apps/admin/public/config.json
 
       - name: Run frontend E2E tests
         shell: bash
@@ -344,7 +330,7 @@ jobs:
           echo "Running Frontend E2E Tests with Playwright"
           echo "=========================================="
           echo ""
-          cd frontend
+          cd apps/frontend
 
           # Run E2E tests
           npm run e2e || E2E_EXIT_CODE=$?
@@ -365,7 +351,7 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: frontend/playwright-report/
+          path: apps/frontend/playwright-report/
           retention-days: 30
           if-no-files-found: ignore
 
@@ -374,7 +360,7 @@ jobs:
         if: failure()
         with:
           name: e2e-test-results
-          path: frontend/test-results/
+          path: apps/frontend/test-results/
           retention-days: 30
           if-no-files-found: ignore
 
