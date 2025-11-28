@@ -152,14 +152,14 @@ ON CONFLICT (id) DO UPDATE SET
 -- ============================================
 
 INSERT INTO public.option_categories (id, name, slug, description) VALUES
-    ('cat00001-0000-0000-0000-000000000001'::uuid, 'Activities', 'activities', 'Things to do and experiences'),
-    ('cat00002-0000-0000-0000-000000000002'::uuid, 'Food & Drink', 'food-drink', 'Culinary preferences and choices'),
-    ('cat00003-0000-0000-0000-000000000003'::uuid, 'Entertainment', 'entertainment', 'Movies, music, and media'),
-    ('cat00004-0000-0000-0000-000000000004'::uuid, 'Travel', 'travel', 'Destinations and vacation preferences'),
-    ('cat00005-0000-0000-0000-000000000005'::uuid, 'Romantic', 'romantic', 'Romantic scenarios and date ideas'),
-    ('cat00006-0000-0000-0000-000000000006'::uuid, 'Intimate', 'intimate', 'Personal and intimate choices'),
-    ('cat00007-0000-0000-0000-000000000007'::uuid, 'Hobbies', 'hobbies', 'Interests and pastimes'),
-    ('cat00008-0000-0000-0000-000000000008'::uuid, 'Lifestyle', 'lifestyle', 'Daily life and routines')
+    ('caa00001-0000-0000-0000-000000000001'::uuid, 'Activities', 'activities', 'Things to do and experiences'),
+    ('caa00002-0000-0000-0000-000000000002'::uuid, 'Food & Drink', 'food-drink', 'Culinary preferences and choices'),
+    ('caa00003-0000-0000-0000-000000000003'::uuid, 'Entertainment', 'entertainment', 'Movies, music, and media'),
+    ('caa00004-0000-0000-0000-000000000004'::uuid, 'Travel', 'travel', 'Destinations and vacation preferences'),
+    ('caa00005-0000-0000-0000-000000000005'::uuid, 'Romantic', 'romantic', 'Romantic scenarios and date ideas'),
+    ('caa00006-0000-0000-0000-000000000006'::uuid, 'Intimate', 'intimate', 'Personal and intimate choices'),
+    ('caa00007-0000-0000-0000-000000000007'::uuid, 'Hobbies', 'hobbies', 'Interests and pastimes'),
+    ('caa00008-0000-0000-0000-000000000008'::uuid, 'Lifestyle', 'lifestyle', 'Daily life and routines')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
@@ -177,40 +177,40 @@ INSERT INTO public.options (
     tags
 ) VALUES
     -- Friends session type options
-    ('opt00001-0000-0000-0000-000000000001'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Go to the beach', 'Spend a day at the beach', 'friends', 1, 'published', ARRAY['outdoor', 'summer']),
-    ('opt00002-0000-0000-0000-000000000002'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Watch a movie', 'Watch a movie together', 'friends', 1, 'published', ARRAY['indoor', 'relaxing']),
-    ('opt00003-0000-0000-0000-000000000003'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Play video games', 'Gaming session', 'friends', 1, 'published', ARRAY['indoor', 'gaming']),
-    ('opt00004-0000-0000-0000-000000000004'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Go hiking', 'Hike in nature', 'friends', 2, 'published', ARRAY['outdoor', 'active']),
-    ('opt00005-0000-0000-0000-000000000005'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Try a new restaurant', 'Explore new cuisine', 'friends', 2, 'published', ARRAY['food', 'adventure']),
-    ('opt00006-0000-0000-0000-000000000006'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Attend a concert', 'See live music', 'friends', 2, 'published', ARRAY['music', 'entertainment']),
-    ('opt00007-0000-0000-0000-000000000007'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have a picnic', 'Outdoor dining', 'friends', 1, 'published', ARRAY['outdoor', 'food']),
-    ('opt00008-0000-0000-0000-000000000008'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Go bowling', 'Bowl a few games', 'friends', 1, 'published', ARRAY['indoor', 'game']),
-    ('opt00009-0000-0000-0000-000000000009'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Visit a museum', 'Cultural exploration', 'friends', 2, 'published', ARRAY['culture', 'educational']),
-    ('opt00010-0000-0000-0000-000000000010'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have game night', 'Board games with friends', 'friends', 1, 'published', ARRAY['indoor', 'social']),
+    ('00000001-0000-0000-0000-000000000001'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Go to the beach', 'Spend a day at the beach', 'friends', 1, 'published', ARRAY['outdoor', 'summer']),
+    ('00000002-0000-0000-0000-000000000002'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Watch a movie', 'Watch a movie together', 'friends', 1, 'published', ARRAY['indoor', 'relaxing']),
+    ('00000003-0000-0000-0000-000000000003'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Play video games', 'Gaming session', 'friends', 1, 'published', ARRAY['indoor', 'gaming']),
+    ('00000004-0000-0000-0000-000000000004'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Go hiking', 'Hike in nature', 'friends', 2, 'published', ARRAY['outdoor', 'active']),
+    ('00000005-0000-0000-0000-000000000005'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Try a new restaurant', 'Explore new cuisine', 'friends', 2, 'published', ARRAY['food', 'adventure']),
+    ('00000006-0000-0000-0000-000000000006'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Attend a concert', 'See live music', 'friends', 2, 'published', ARRAY['music', 'entertainment']),
+    ('00000007-0000-0000-0000-000000000007'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have a picnic', 'Outdoor dining', 'friends', 1, 'published', ARRAY['outdoor', 'food']),
+    ('00000008-0000-0000-0000-000000000008'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Go bowling', 'Bowl a few games', 'friends', 1, 'published', ARRAY['indoor', '3000']),
+    ('00000009-0000-0000-0000-000000000009'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Visit a museum', 'Cultural exploration', 'friends', 2, 'published', ARRAY['culture', 'educational']),
+    ('00000010-0000-0000-0000-000000000010'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have game night', 'Board games with friends', 'friends', 1, 'published', ARRAY['indoor', 'social']),
 
     -- Couple session type options
-    ('opt00011-0000-0000-0000-000000000011'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Cook dinner together', 'Prepare a meal as a couple', 'couple', 2, 'published', ARRAY['romantic', 'food']),
-    ('opt00012-0000-0000-0000-000000000012'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Take a sunset walk', 'Romantic evening stroll', 'couple', 1, 'published', ARRAY['romantic', 'outdoor']),
-    ('opt00013-0000-0000-0000-000000000013'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have a spa day', 'Relaxation together', 'couple', 3, 'published', ARRAY['relaxing', 'luxury']),
-    ('opt00014-0000-0000-0000-000000000014'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Plan a weekend getaway', 'Short trip together', 'couple', 3, 'published', ARRAY['travel', 'romantic']),
-    ('opt00015-0000-0000-0000-000000000015'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Watch the stars', 'Stargazing together', 'couple', 2, 'published', ARRAY['romantic', 'outdoor']),
-    ('opt00016-0000-0000-0000-000000000016'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dance at home', 'Private dance session', 'couple', 2, 'published', ARRAY['romantic', 'fun']),
-    ('opt00017-0000-0000-0000-000000000017'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Take a couples class', 'Learn something new together', 'couple', 3, 'published', ARRAY['educational', 'bonding']),
-    ('opt00018-0000-0000-0000-000000000018'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have breakfast in bed', 'Cozy morning together', 'couple', 1, 'published', ARRAY['romantic', 'relaxing']),
-    ('opt00019-0000-0000-0000-000000000019'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Give each other massages', 'Relaxing touch', 'couple', 2, 'published', ARRAY['intimate', 'relaxing']),
-    ('opt00020-0000-0000-0000-000000000020'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Write love letters', 'Express feelings', 'couple', 2, 'published', ARRAY['romantic', 'creative']),
+    ('00000011-0000-0000-0000-000000000011'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Cook dinner together', 'Prepare a meal as a couple', 'couple', 2, 'published', ARRAY['romantic', 'food']),
+    ('00000012-0000-0000-0000-000000000012'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Take a sunset walk', 'Romantic evening stroll', 'couple', 1, 'published', ARRAY['romantic', 'outdoor']),
+    ('00000013-0000-0000-0000-000000000013'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have a spa day', 'Relaxation together', 'couple', 3, 'published', ARRAY['relaxing', 'luxury']),
+    ('00000014-0000-0000-0000-000000000014'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Plan a weekend getaway', 'Short trip together', 'couple', 3, 'published', ARRAY['travel', 'romantic']),
+    ('00000015-0000-0000-0000-000000000015'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Watch the stars', 'Stargazing together', 'couple', 2, 'published', ARRAY['romantic', 'outdoor']),
+    ('00000016-0000-0000-0000-000000000016'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dance at home', 'Private dance session', 'couple', 2, 'published', ARRAY['romantic', 'fun']),
+    ('00000017-0000-0000-0000-000000000017'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Take a couples class', 'Learn something new together', 'couple', 3, 'published', ARRAY['educational', 'bonding']),
+    ('00000018-0000-0000-0000-000000000018'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Have breakfast in bed', 'Cozy morning together', 'couple', 1, 'published', ARRAY['romantic', 'relaxing']),
+    ('00000019-0000-0000-0000-000000000019'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Give each other massages', 'Relaxing touch', 'couple', 2, 'published', ARRAY['intimate', 'relaxing']),
+    ('00000020-0000-0000-0000-000000000020'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Write love letters', 'Express feelings', 'couple', 2, 'published', ARRAY['romantic', 'creative']),
 
     -- Adult session type options
-    ('opt00021-0000-0000-0000-000000000021'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Try a new position', 'Experiment in the bedroom', 'adult', 3, 'published', ARRAY['spicy', 'adventurous']),
-    ('opt00022-0000-0000-0000-000000000022'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Play truth or dare', 'Adult version', 'adult', 2, 'published', ARRAY['fun', 'flirty']),
-    ('opt00023-0000-0000-0000-000000000023'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Share a fantasy', 'Open communication', 'adult', 3, 'published', ARRAY['intimate', 'communication']),
-    ('opt00024-0000-0000-0000-000000000024'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Set the mood with candles', 'Create ambiance', 'adult', 2, 'published', ARRAY['romantic', 'sensual']),
-    ('opt00025-0000-0000-0000-000000000025'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Take a shower together', 'Intimate bathing', 'adult', 2, 'published', ARRAY['intimate', 'playful']),
-    ('opt00026-0000-0000-0000-000000000026'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Role play scenario', 'Act out fantasies', 'adult', 4, 'published', ARRAY['adventurous', 'playful']),
-    ('opt00027-0000-0000-0000-000000000027'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Use blindfolds', 'Sensory play', 'adult', 3, 'published', ARRAY['spicy', 'experimental']),
-    ('opt00028-0000-0000-0000-000000000028'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Send a sexy text', 'Digital flirting', 'adult', 2, 'published', ARRAY['flirty', 'teasing']),
-    ('opt00029-0000-0000-0000-000000000029'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Watch something together', 'Adult content viewing', 'adult', 3, 'published', ARRAY['entertainment', 'bonding']),
-    ('opt00030-0000-0000-0000-000000000030'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Plan a romantic evening', 'Set the stage', 'adult', 2, 'published', ARRAY['romantic', 'planning'])
+    ('00000021-0000-0000-0000-000000000021'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Try a new position', 'Experiment in the bedroom', 'adult', 3, 'published', ARRAY['spicy', 'adventurous']),
+    ('00000022-0000-0000-0000-000000000022'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Play truth or dare', 'Adult version', 'adult', 2, 'published', ARRAY['fun', 'flirty']),
+    ('00000023-0000-0000-0000-000000000023'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Share a fantasy', 'Open communication', 'adult', 3, 'published', ARRAY['intimate', 'communication']),
+    ('00000024-0000-0000-0000-000000000024'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Set the mood with candles', 'Create ambiance', 'adult', 2, 'published', ARRAY['romantic', 'sensual']),
+    ('00000025-0000-0000-0000-000000000025'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Take a shower together', 'Intimate bathing', 'adult', 2, 'published', ARRAY['intimate', 'playful']),
+    ('00000026-0000-0000-0000-000000000026'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Role play scenario', 'Act out fantasies', 'adult', 4, 'published', ARRAY['adventurous', 'playful']),
+    ('00000027-0000-0000-0000-000000000027'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Use blindfolds', 'Sensory play', 'adult', 3, 'published', ARRAY['spicy', 'experimental']),
+    ('00000028-0000-0000-0000-000000000028'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Send a sexy text', 'Digital flirting', 'adult', 2, 'published', ARRAY['flirty', 'teasing']),
+    ('00000029-0000-0000-0000-000000000029'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Watch something together', 'Adult content viewing', 'adult', 3, 'published', ARRAY['entertainment', 'bonding']),
+    ('00000030-0000-0000-0000-000000000030'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Plan a romantic evening', 'Set the stage', 'adult', 2, 'published', ARRAY['romantic', 'planning'])
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
@@ -219,32 +219,32 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.option_category_assignments (option_id, option_category_id) VALUES
     -- Activities category
-    ('opt00001-0000-0000-0000-000000000001', 'cat00001-0000-0000-0000-000000000001'),
-    ('opt00004-0000-0000-0000-000000000004', 'cat00001-0000-0000-0000-000000000001'),
-    ('opt00007-0000-0000-0000-000000000007', 'cat00001-0000-0000-0000-000000000001'),
-    ('opt00008-0000-0000-0000-000000000008', 'cat00001-0000-0000-0000-000000000001'),
+    ('00000001-0000-0000-0000-000000000001', 'caa00001-0000-0000-0000-000000000001'),
+    ('00000004-0000-0000-0000-000000000004', 'caa00001-0000-0000-0000-000000000001'),
+    ('00000007-0000-0000-0000-000000000007', 'caa00001-0000-0000-0000-000000000001'),
+    ('00000008-0000-0000-0000-000000000008', 'caa00001-0000-0000-0000-000000000001'),
 
     -- Food & Drink
-    ('opt00005-0000-0000-0000-000000000005', 'cat00002-0000-0000-0000-000000000002'),
-    ('opt00011-0000-0000-0000-000000000011', 'cat00002-0000-0000-0000-000000000002'),
+    ('00000005-0000-0000-0000-000000000005', 'caa00002-0000-0000-0000-000000000002'),
+    ('00000011-0000-0000-0000-000000000011', 'caa00002-0000-0000-0000-000000000002'),
 
     -- Entertainment
-    ('opt00002-0000-0000-0000-000000000002', 'cat00003-0000-0000-0000-000000000003'),
-    ('opt00003-0000-0000-0000-000000000003', 'cat00003-0000-0000-0000-000000000003'),
-    ('opt00006-0000-0000-0000-000000000006', 'cat00003-0000-0000-0000-000000000003'),
+    ('00000002-0000-0000-0000-000000000002', 'caa00003-0000-0000-0000-000000000003'),
+    ('00000003-0000-0000-0000-000000000003', 'caa00003-0000-0000-0000-000000000003'),
+    ('00000006-0000-0000-0000-000000000006', 'caa00003-0000-0000-0000-000000000003'),
 
     -- Romantic
-    ('opt00011-0000-0000-0000-000000000011', 'cat00005-0000-0000-0000-000000000005'),
-    ('opt00012-0000-0000-0000-000000000012', 'cat00005-0000-0000-0000-000000000005'),
-    ('opt00015-0000-0000-0000-000000000015', 'cat00005-0000-0000-0000-000000000005'),
-    ('opt00016-0000-0000-0000-000000000016', 'cat00005-0000-0000-0000-000000000005'),
-    ('opt00020-0000-0000-0000-000000000020', 'cat00005-0000-0000-0000-000000000005'),
+    ('00000011-0000-0000-0000-000000000011', 'caa00005-0000-0000-0000-000000000005'),
+    ('00000012-0000-0000-0000-000000000012', 'caa00005-0000-0000-0000-000000000005'),
+    ('00000015-0000-0000-0000-000000000015', 'caa00005-0000-0000-0000-000000000005'),
+    ('00000016-0000-0000-0000-000000000016', 'caa00005-0000-0000-0000-000000000005'),
+    ('00000020-0000-0000-0000-000000000020', 'caa00005-0000-0000-0000-000000000005'),
 
     -- Intimate
-    ('opt00019-0000-0000-0000-000000000019', 'cat00006-0000-0000-0000-000000000006'),
-    ('opt00021-0000-0000-0000-000000000021', 'cat00006-0000-0000-0000-000000000006'),
-    ('opt00023-0000-0000-0000-000000000023', 'cat00006-0000-0000-0000-000000000006'),
-    ('opt00025-0000-0000-0000-000000000025', 'cat00006-0000-0000-0000-000000000006')
+    ('00000019-0000-0000-0000-000000000019', 'caa00006-0000-0000-0000-000000000006'),
+    ('00000021-0000-0000-0000-000000000021', 'caa00006-0000-0000-0000-000000000006'),
+    ('00000023-0000-0000-0000-000000000023', 'caa00006-0000-0000-0000-000000000006'),
+    ('00000025-0000-0000-0000-000000000025', 'caa00006-0000-0000-0000-000000000006')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
@@ -261,25 +261,25 @@ INSERT INTO public.questions (
     tags
 ) VALUES
     -- Friends session type questions
-    ('q0000001-0000-0000-0000-000000000001'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would I prefer to do this weekend?', 'Casual activity preference', 'friends', 'published', ARRAY['weekend', 'activity']),
-    ('q0000002-0000-0000-0000-000000000002'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like to spend a free evening?', 'Evening plans', 'friends', 'published', ARRAY['evening', 'relaxation']),
-    ('q0000003-0000-0000-0000-000000000003'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What kind of adventure sounds fun to me?', 'Adventure preference', 'friends', 'published', ARRAY['adventure', 'excitement']),
-    ('q0000004-0000-0000-0000-000000000004'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make me happiest right now?', 'Current mood', 'friends', 'published', ARRAY['mood', 'happiness']),
-    ('q0000005-0000-0000-0000-000000000005'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Which activity would I choose for us?', 'Group activity', 'friends', 'published', ARRAY['group', 'bonding']),
+    ('10000001-0000-0000-0000-000000000001'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would I prefer to do this weekend?', 'Casual activity preference', 'friends', 'published', ARRAY['weekend', 'activity']),
+    ('10000002-0000-0000-0000-000000000002'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like to spend a free evening?', 'Evening plans', 'friends', 'published', ARRAY['evening', 'relaxation']),
+    ('10000003-0000-0000-0000-000000000003'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What kind of adventure sounds fun to me?', 'Adventure preference', 'friends', 'published', ARRAY['adventure', 'excitement']),
+    ('10000004-0000-0000-0000-000000000004'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make me happiest right now?', 'Current mood', 'friends', 'published', ARRAY['mood', 'happiness']),
+    ('10000005-0000-0000-0000-000000000005'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Which activity would I choose for us?', 'Group activity', 'friends', 'published', ARRAY['group', 'bonding']),
 
     -- Couple session type questions
-    ('q0000006-0000-0000-0000-000000000006'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What romantic gesture would I appreciate most?', 'Romance preference', 'couple', 'published', ARRAY['romance', 'gestures']),
-    ('q0000007-0000-0000-0000-000000000007'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like us to spend quality time together?', 'Quality time ideas', 'couple', 'published', ARRAY['quality-time', 'togetherness']),
-    ('q0000008-0000-0000-0000-000000000008'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make our next date special?', 'Date ideas', 'couple', 'published', ARRAY['date', 'special']),
-    ('q0000009-0000-0000-0000-000000000009'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would help us connect deeper?', 'Connection building', 'couple', 'published', ARRAY['connection', 'intimacy']),
-    ('q0000010-0000-0000-0000-000000000010'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What romantic activity am I craving?', 'Romantic desires', 'couple', 'published', ARRAY['romance', 'desire']),
+    ('10000006-0000-0000-0000-000000000006'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What romantic gesture would I appreciate most?', 'Romance preference', 'couple', 'published', ARRAY['romance', 'gestures']),
+    ('10000007-0000-0000-0000-000000000007'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like us to spend quality time together?', 'Quality time ideas', 'couple', 'published', ARRAY['quality-time', 'togetherness']),
+    ('10000008-0000-0000-0000-000000000008'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make our next date special?', 'Date ideas', 'couple', 'published', ARRAY['date', 'special']),
+    ('10000009-0000-0000-0000-000000000009'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would help us connect deeper?', 'Connection building', 'couple', 'published', ARRAY['connection', 'intimacy']),
+    ('10000010-0000-0000-0000-000000000010'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What romantic activity am I craving?', 'Romantic desires', 'couple', 'published', ARRAY['romance', 'desire']),
 
     -- Adult session type questions
-    ('q0000011-0000-0000-0000-000000000011'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would spice up our evening?', 'Evening excitement', 'adult', 'published', ARRAY['spicy', 'excitement']),
-    ('q0000012-0000-0000-0000-000000000012'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What intimate activity am I in the mood for?', 'Intimate preferences', 'adult', 'published', ARRAY['intimate', 'mood']),
-    ('q0000013-0000-0000-0000-000000000013'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make tonight unforgettable?', 'Memorable moments', 'adult', 'published', ARRAY['memorable', 'special']),
-    ('q0000014-0000-0000-0000-000000000014'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like to connect physically?', 'Physical connection', 'adult', 'published', ARRAY['physical', 'connection']),
-    ('q0000015-0000-0000-0000-000000000015'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What fantasy am I curious about?', 'Fantasy exploration', 'adult', 'published', ARRAY['fantasy', 'exploration'])
+    ('10000011-0000-0000-0000-000000000011'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would spice up our evening?', 'Evening excitement', 'adult', 'published', ARRAY['spicy', 'excitement']),
+    ('10000012-0000-0000-0000-000000000012'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What intimate activity am I in the mood for?', 'Intimate preferences', 'adult', 'published', ARRAY['intimate', 'mood']),
+    ('10000013-0000-0000-0000-000000000013'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What would make tonight unforgettable?', 'Memorable moments', 'adult', 'published', ARRAY['memorable', 'special']),
+    ('10000014-0000-0000-0000-000000000014'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'How would I like to connect physically?', 'Physical connection', 'adult', 'published', ARRAY['physical', 'connection']),
+    ('10000015-0000-0000-0000-000000000015'::uuid, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'What fantasy am I curious about?', 'Fantasy exploration', 'adult', 'published', ARRAY['fantasy', 'exploration'])
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
@@ -299,7 +299,7 @@ INSERT INTO public.game_sessions (
     started_at
 ) VALUES
     (
-        'game0001-0000-0000-0000-000000000001'::uuid,
+        '30000001-0000-0000-0000-000000000001'::uuid,
         'b1ffbc99-9c0b-4ef8-bb6d-6bb9bd380a22', -- Bob
         'c2ffbc99-9c0b-4ef8-bb6d-6bb9bd380a33', -- Carol
         'friends',
@@ -328,33 +328,33 @@ INSERT INTO public.game_rounds (
     completed_at
 ) VALUES
     (
-        'round001-0000-0000-0000-000000000001'::uuid,
-        'game0001-0000-0000-0000-000000000001',
+        '20000001-0000-0000-0000-000000000001'::uuid,
+        '30000001-0000-0000-0000-000000000001',
         1,
         ARRAY[
-            'opt00001-0000-0000-0000-000000000001'::uuid,
-            'opt00002-0000-0000-0000-000000000002'::uuid,
-            'opt00003-0000-0000-0000-000000000003'::uuid,
-            'opt00004-0000-0000-0000-000000000004'::uuid
+            '00000001-0000-0000-0000-000000000001'::uuid,
+            '00000002-0000-0000-0000-000000000002'::uuid,
+            '00000003-0000-0000-0000-000000000003'::uuid,
+            '00000004-0000-0000-0000-000000000004'::uuid
         ],
-        'opt00002-0000-0000-0000-000000000002'::uuid, -- Bob chose "Watch a movie"
-        'opt00002-0000-0000-0000-000000000002'::uuid, -- Carol guessed "Watch a movie"
+        '00000002-0000-0000-0000-000000000002'::uuid, -- Bob chose "Watch a movie"
+        '00000002-0000-0000-0000-000000000002'::uuid, -- Carol guessed "Watch a movie"
         true,
         10,
         NOW() - INTERVAL '8 minutes'
     ),
     (
-        'round002-0000-0000-0000-000000000002'::uuid,
-        'game0001-0000-0000-0000-000000000001',
+        '20000002-0000-0000-0000-000000000002'::uuid,
+        '30000001-0000-0000-0000-000000000001',
         2,
         ARRAY[
-            'opt00005-0000-0000-0000-000000000005'::uuid,
-            'opt00006-0000-0000-0000-000000000006'::uuid,
-            'opt00007-0000-0000-0000-000000000007'::uuid,
-            'opt00008-0000-0000-0000-000000000008'::uuid
+            '00000005-0000-0000-0000-000000000005'::uuid,
+            '00000006-0000-0000-0000-000000000006'::uuid,
+            '00000007-0000-0000-0000-000000000007'::uuid,
+            '00000008-0000-0000-0000-000000000008'::uuid
         ],
-        'opt00005-0000-0000-0000-000000000005'::uuid, -- Bob chose "Try a new restaurant"
-        'opt00005-0000-0000-0000-000000000005'::uuid, -- Carol guessed correctly
+        '00000005-0000-0000-0000-000000000005'::uuid, -- Bob chose "Try a new restaurant"
+        '00000005-0000-0000-0000-000000000005'::uuid, -- Carol guessed correctly
         true,
         10,
         NOW() - INTERVAL '5 minutes'

@@ -75,7 +75,7 @@ CREATE POLICY "Admins can delete any question, users can delete own"
 CREATE TRIGGER update_questions_updated_at
     BEFORE UPDATE ON public.questions
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at();
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Add comment
 COMMENT ON TABLE public.questions IS 'Questions/prompts that frame the game rounds (e.g., "What would I prefer to do this weekend?")';

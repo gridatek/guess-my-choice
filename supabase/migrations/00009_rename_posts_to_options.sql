@@ -1,6 +1,9 @@
 -- Migration: Rename posts table to options for game functionality
 -- This adapts the existing posts structure to store game options/choices
 
+-- Drop dependent views first
+DROP VIEW IF EXISTS public.profile_stats;
+
 -- Rename the table
 ALTER TABLE public.posts RENAME TO options;
 
@@ -101,3 +104,17 @@ CREATE TRIGGER update_options_updated_at
 
 -- Add comment
 COMMENT ON TABLE public.options IS 'Game options pool - admin-created choices that players select from during game sessions';
+
+-- Recreate profile_stats view with updated table and column names
+CREATE OR REPLACE VIEW public.profile_stats AS
+SELECT
+    p.id,
+    p.username,
+    COUNT(DISTINCT f1.follower_id) as followers_count,
+    COUNT(DISTINCT f2.following_id) as following_count,
+    COUNT(DISTINCT opts.id) as posts_count
+FROM public.profiles p
+         LEFT JOIN public.follows f1 ON f1.following_id = p.id
+         LEFT JOIN public.follows f2 ON f2.follower_id = p.id
+         LEFT JOIN public.options opts ON opts.user_id = p.id AND opts.status = 'published'
+GROUP BY p.id, p.username;
