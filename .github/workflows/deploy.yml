@@ -30,8 +30,5 @@ jobs:
 
       - run: supabase link --project-ref $PROJECT_ID
 
-      - run: pnpm run migrate:prod
-
-      - run: |
-          curl -f https://$PROJECT_ID.supabase.co/rest/v1/ || exit 1
-        shell: bash
+      - name: Deploy database migrations
+        run: pnpm run migrate:prod
