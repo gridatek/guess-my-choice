@@ -4,7 +4,7 @@ import { authGuard } from './guards/auth-guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/login',
+    redirectTo: '/dashboard',
     pathMatch: 'full',
   },
   {
@@ -26,7 +26,27 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'game',
+    loadComponent: () => import('./game/game-home/game-home').then((m) => m.GameHome),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'game/lobby/:id',
+    loadComponent: () => import('./game/session-lobby/session-lobby').then((m) => m.SessionLobby),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'game/play/:id',
+    loadComponent: () => import('./game/game-play/game-play').then((m) => m.GamePlay),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'game/results/:id',
+    loadComponent: () => import('./game/game-results/game-results').then((m) => m.GameResults),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
-    redirectTo: '/login',
+    redirectTo: '/dashboard',
   },
 ];

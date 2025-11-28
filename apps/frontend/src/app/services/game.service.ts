@@ -16,6 +16,8 @@ export interface GameSession {
   session_code: string;
   created_at: string;
   updated_at: string;
+  started_at: string | null;
+  finished_at: string | null;
 }
 
 export interface GameRound {

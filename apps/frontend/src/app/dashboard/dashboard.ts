@@ -1,11 +1,11 @@
 import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <div class="min-h-screen bg-gray-50">
       <nav class="bg-white shadow-sm">
@@ -73,14 +73,23 @@ import { AuthService } from '../services/auth.service';
 
           <div class="mt-6 bg-white shadow sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">Welcome to Guess My Choice!</h3>
+              <h3 class="text-lg leading-6 font-medium text-gray-900">
+                Welcome to Guess My Choice!
+              </h3>
               <div class="mt-2 max-w-xl text-sm text-gray-500">
                 <p>
-                  A 2-player multiplayer game where you guess each other's choices and build connection points.
+                  A 2-player multiplayer game where you guess each other's choices and build
+                  connection points.
                 </p>
-                <p class="mt-2">
-                  Game features coming soon: Create sessions, join games, and play with friends!
-                </p>
+              </div>
+              <div class="mt-6">
+                <button
+                  (click)="goToGame()"
+                  class="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition text-lg shadow-lg"
+                  data-testid="play-game-button"
+                >
+                  🎮 Start Playing
+                </button>
               </div>
             </div>
           </div>
@@ -109,5 +118,9 @@ export class Dashboard {
     } catch (error: any) {
       console.error('Sign out error:', error);
     }
+  }
+
+  goToGame() {
+    this.router.navigate(['/game']);
   }
 }
