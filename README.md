@@ -4,6 +4,56 @@
 
 **Guess My Choice** is a **turn-based, 2-player multiplayer game** for web and mobile where players create a real connection through interactive gameplay. The game is designed for **friends, couples, or adult sessions**.
 
+## **Quick Start**
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) v20 or later
+- [pnpm](https://pnpm.io/) v9 or later
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
+
+### Installation
+
+```bash
+# Install pnpm if you haven't already
+npm install -g pnpm
+
+# Install dependencies
+pnpm install
+
+# Start Supabase services (database, auth, storage, etc.)
+pnpm dev
+
+# In another terminal, start the frontend
+pnpm frontend:dev
+
+# Or start the admin app
+pnpm admin:dev
+```
+
+### Managing Dependencies
+
+This project uses **pnpm with catalogs** for centralized dependency management:
+
+```bash
+# Add a dependency to a workspace
+pnpm --filter @guess-my-choice/frontend add <package>
+
+# Add a shared dependency to the catalog (in root package.json)
+# Edit package.json → pnpm.catalogs.default → add version
+
+# Update all dependencies
+pnpm update -r
+
+# Run scripts across all workspaces
+pnpm -r build
+```
+
+**Catalog Benefits:**
+- All Angular/Tailwind/TypeScript versions centralized in root package.json
+- Workspaces reference with `"catalog:"` instead of version numbers
+- Single source of truth for dependency versions
+- Easier to upgrade shared dependencies
+
 - **Players:** 2 (Player 1 and Player 2)  
 - **Platforms:**  
   - **Web:** Angular  

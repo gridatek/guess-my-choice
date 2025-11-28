@@ -3,6 +3,12 @@ node_modules/
 .pnp
 .pnp.js
 
+# pnpm
+pnpm-lock.yaml
+
+# npm (legacy - no longer used)
+package-lock.json
+
 # Testing
 coverage/
 .nyc_output
