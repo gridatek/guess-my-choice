@@ -331,8 +331,8 @@ jobs:
           echo ""
           cd apps/frontend
 
-          # Run frontend E2E tests (exclude admin tests)
-          npx playwright test --grep-invert "Admin Panel" || E2E_EXIT_CODE=$?
+          # Run frontend E2E tests (exclude admin tests) with max workers
+          npx playwright test --grep-invert "Admin Panel" --workers=100% || E2E_EXIT_CODE=$?
 
           echo ""
           echo "=========================================="
@@ -354,8 +354,8 @@ jobs:
           echo ""
           cd apps/frontend
 
-          # Run only admin E2E tests
-          npx playwright test admin.spec.ts || ADMIN_E2E_EXIT_CODE=$?
+          # Run only admin E2E tests with max workers
+          npx playwright test admin.spec.ts --workers=100% || ADMIN_E2E_EXIT_CODE=$?
 
           echo ""
           echo "=========================================="
