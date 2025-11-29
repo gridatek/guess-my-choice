@@ -97,7 +97,7 @@ import { AuthService } from '../services/auth.service';
                           id="new-password"
                           [(ngModel)]="newPassword"
                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                          data-testid="new-password-input"
+                          data-testid="password-input"
                         />
                       </div>
 
@@ -196,7 +196,7 @@ export class Profile {
     }
   }
 
-  onSubmit(event: Event) {
+  async onSubmit(event: Event) {
     event.preventDefault();
     this.errorMessage.set('');
     this.successMessage.set('');
@@ -216,18 +216,44 @@ export class Profile {
 
     this.isSaving.set(true);
 
-    // Simulate save (implement actual save logic here)
-    setTimeout(() => {
+    try {
+      // Update password if provided
+      if (this.newPassword) {
+        const supabase = this.authService.getSupabaseClient();
+        const { data, error } = await supabase.auth.updateUser({
+          password: this.newPassword,
+        });
+
+        if (error) {
+          console.error('Password update error:', error);
+          this.errorMessage.set(error.message);
+          this.isSaving.set(false);
+          return;
+        }
+
+        console.log('Password updated successfully:', data);
+      }
+
+      // TODO: Update username and full name in profiles table
+
       this.isSaving.set(false);
       this.successMessage.set('Profile updated successfully');
+
+      const passwordChanged = !!this.newPassword;
       this.newPassword = '';
       this.confirmPassword = '';
 
       // Redirect to dashboard after success
+      // Wait a bit longer if password was changed to ensure it's persisted
+      const redirectDelay = passwordChanged ? 2000 : 1000;
       setTimeout(() => {
         this.router.navigate(['/dashboard']);
-      }, 1000);
-    }, 1000);
+      }, redirectDelay);
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      this.errorMessage.set(error.message || 'Failed to update profile');
+      this.isSaving.set(false);
+    }
   }
 
   goBack() {
