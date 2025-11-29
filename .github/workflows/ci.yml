@@ -8,13 +8,11 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        # TODO: Re-enable once docker/setup-docker-action is stable
-        # os: [ubuntu-latest, windows-latest, macos-latest]
+        shard: [1, 2, 3, 4]  # Run tests in 4 parallel jobs
 
     steps:
       - uses: actions/checkout@v5
@@ -328,21 +326,21 @@ jobs:
           echo "Admin config:"
           cat apps/admin/public/config.json
 
-      - name: Run frontend E2E tests
+      - name: Run frontend E2E tests (shard ${{ matrix.shard }}/4)
         shell: bash
         run: |
           echo "=========================================="
-          echo "Running Frontend E2E Tests with Playwright"
+          echo "Running Frontend E2E Tests - Shard ${{ matrix.shard }}/4"
           echo "=========================================="
           echo ""
           cd apps/frontend
 
-          # Run E2E tests
-          npm run e2e || E2E_EXIT_CODE=$?
+          # Run E2E tests with sharding
+          npx playwright test --shard=${{ matrix.shard }}/4 || E2E_EXIT_CODE=$?
 
           echo ""
           echo "=========================================="
-          echo "E2E test execution completed with exit code: ${E2E_EXIT_CODE:-0}"
+          echo "E2E test shard ${{ matrix.shard }}/4 completed with exit code: ${E2E_EXIT_CODE:-0}"
           echo "=========================================="
 
           if [ ! -z "$E2E_EXIT_CODE" ] && [ "$E2E_EXIT_CODE" != "0" ]; then
@@ -355,7 +353,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: apps/frontend/playwright-report/
           retention-days: 30
           if-no-files-found: ignore
@@ -364,7 +362,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e-test-results
+          name: e2e-test-results-${{ matrix.shard }}
           path: apps/frontend/test-results/
           retention-days: 30
           if-no-files-found: ignore
