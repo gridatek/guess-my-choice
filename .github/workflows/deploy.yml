@@ -23,3 +23,6 @@ jobs:
 
       - name: Deploy database migrations
         run: supabase db push
+        # TODO: Remove seed data before production deployment
+        # Current seed.sql contains test users (alice@example.com, bob@example.com, carol@example.com)
+        # with password "password123" which should NOT be in production
