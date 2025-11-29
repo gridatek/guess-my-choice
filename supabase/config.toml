@@ -5,7 +5,7 @@ project_id = "angular-supabase"
 # Port to use for the local database URL
 port = 54322
 # The database major version to use
-major_version = 15
+major_version = 17
 
 [db.seed]
 # Enable seeding on reset

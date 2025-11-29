@@ -22,7 +22,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '20'
-          cache: 'pnpm'
 
       - uses: supabase/setup-cli@v1
         with:
