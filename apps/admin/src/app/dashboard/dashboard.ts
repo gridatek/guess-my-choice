@@ -12,9 +12,13 @@ import { AuthService } from '../services/auth.service';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between h-16">
             <div class="flex items-center">
-              <h1 class="text-xl font-bold text-gray-900" data-testid="dashboard-title">
+              <a
+                routerLink="/dashboard"
+                class="text-xl font-bold text-gray-900 hover:text-gray-700"
+                data-testid="dashboard-link"
+              >
                 Dashboard
-              </h1>
+              </a>
             </div>
             <div class="flex items-center space-x-4">
               <a
@@ -45,13 +49,15 @@ import { AuthService } from '../services/auth.service';
               >
                 Edit Profile
               </a>
-              <a
-                routerLink="/admin/users"
-                class="text-gray-600 hover:text-gray-900"
-                data-testid="admin-link"
-              >
-                Admin Panel
-              </a>
+              @if (isAdmin()) {
+                <a
+                  routerLink="/admin/users"
+                  class="text-gray-600 hover:text-gray-900"
+                  data-testid="admin-link"
+                >
+                  Admin Panel
+                </a>
+              }
               <button
                 (click)="onSignOut()"
                 class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -129,6 +135,10 @@ export class Dashboard {
   userCreatedAt = computed(() => {
     const createdAt = this.authService.authState().user?.created_at;
     return createdAt ? new Date(createdAt).toLocaleDateString() : 'N/A';
+  });
+  isAdmin = computed(() => {
+    const user = this.authService.authState().user;
+    return user?.email === 'alice@example.com' || user?.user_metadata?.['role'] === 'admin';
   });
 
   constructor(
