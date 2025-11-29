@@ -108,15 +108,34 @@ export class GameService {
       throw new Error('No active user');
     }
 
+    // Validate session code format
+    const sessionCode = request.session_code.toUpperCase().trim();
+    if (!sessionCode || sessionCode.length !== 6) {
+      throw new Error('Invalid session code');
+    }
+
     // Find session by code
     const { data: session, error: findError } = await supabase
       .from('game_sessions')
       .select()
-      .eq('session_code', request.session_code.toUpperCase())
+      .eq('session_code', sessionCode)
       .eq('status', 'waiting')
       .single();
 
-    if (findError) throw new Error('Session not found or already started');
+    if (findError) {
+      // Check if session exists at all
+      const { data: anySession } = await supabase
+        .from('game_sessions')
+        .select()
+        .eq('session_code', sessionCode)
+        .single();
+
+      if (!anySession) {
+        throw new Error('Invalid session code');
+      } else {
+        throw new Error('Session not found or already started');
+      }
+    }
 
     // Update session with player 2
     const { data, error } = await supabase
