@@ -15,15 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.4
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '20'
-          cache: ''
-
       - uses: supabase/setup-cli@v1
         with:
           version: latest
@@ -31,4 +22,4 @@ jobs:
       - run: supabase link --project-ref $PROJECT_ID
 
       - name: Deploy database migrations
-        run: pnpm run migrate:prod
+        run: supabase db push
