@@ -1,11 +1,11 @@
 import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <div class="min-h-screen bg-gray-50">
       <nav class="bg-white shadow-sm">
@@ -17,15 +17,6 @@ import { AuthService } from '../services/auth.service';
               </h1>
             </div>
             <div class="flex items-center space-x-4">
-              @if (isAdmin()) {
-                <a
-                  [routerLink]="['/admin/users']"
-                  class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  data-testid="admin-link"
-                >
-                  Admin Panel
-                </a>
-              }
               <button
                 (click)="onSignOut()"
                 class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -114,10 +105,6 @@ export class Dashboard {
   userCreatedAt = computed(() => {
     const createdAt = this.authService.authState().user?.created_at;
     return createdAt ? new Date(createdAt).toLocaleDateString() : 'N/A';
-  });
-  isAdmin = computed(() => {
-    const user = this.authService.authState().user;
-    return user?.email === 'alice@example.com' || user?.user_metadata?.['role'] === 'admin';
   });
 
   constructor(
