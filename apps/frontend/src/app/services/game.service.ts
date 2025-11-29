@@ -110,7 +110,7 @@ export class GameService {
 
     // Validate session code format
     const sessionCode = request.session_code.toUpperCase().trim();
-    if (!sessionCode || sessionCode.length !== 6) {
+    if (!sessionCode || sessionCode.length !== 6 || !/^[A-Z0-9]{6}$/.test(sessionCode)) {
       throw new Error('Invalid session code');
     }
 

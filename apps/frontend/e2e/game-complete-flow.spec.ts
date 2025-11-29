@@ -200,7 +200,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       await page.getByTestId('join-game-button').click();
 
       await expect(page.getByTestId('error-message')).toBeVisible();
-      await expect(page.getByTestId('error-message')).toContainText('Invalid session code');
+      await expect(page.getByTestId('error-message')).toContainText('Session not found');
     });
 
     test('Shows error for non-existent session code', async ({ page }) => {
