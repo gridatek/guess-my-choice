@@ -65,24 +65,6 @@ import { AuthService } from '../../services/auth.service';
                     Waiting for Player 2...
                   </button>
                 </div>
-
-                <!-- Player Status -->
-                <div class="grid md:grid-cols-2 gap-4 mb-8">
-                  <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
-                    <div class="text-4xl mb-2">👤</div>
-                    <p class="font-semibold text-green-800" data-testid="player1-name">
-                      {{ currentUserName() }} (You)
-                    </p>
-                    <p class="text-sm text-green-600" data-testid="player1-status">Ready</p>
-                  </div>
-                  <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
-                    <div class="text-4xl mb-2">⏳</div>
-                    <p class="font-semibold text-gray-600" data-testid="player2-name">Player 2</p>
-                    <p class="text-sm text-gray-500" data-testid="player2-status">
-                      Waiting to join...
-                    </p>
-                  </div>
-                </div>
               </div>
             }
 
@@ -94,13 +76,48 @@ import { AuthService } from '../../services/auth.service';
                 <button
                   (click)="startGame()"
                   [disabled]="isStarting()"
-                  class="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition text-lg disabled:opacity-50"
+                  class="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition text-lg disabled:opacity-50 mb-6"
                   data-testid="start-game-button"
                 >
                   {{ isStarting() ? 'Starting...' : 'Start Game' }}
                 </button>
               </div>
             }
+
+            <!-- Player Status (show in both waiting and active states) -->
+            <div class="grid md:grid-cols-2 gap-4 mb-8">
+              <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                <div class="text-4xl mb-2">👤</div>
+                <p class="font-semibold text-green-800" data-testid="player1-name">
+                  {{ currentUserName() }} (You)
+                </p>
+                <p class="text-sm text-green-600" data-testid="player1-status">Ready</p>
+              </div>
+              <div
+                class="rounded-lg p-4"
+                [class]="
+                  session()!.player2_id
+                    ? 'bg-green-50 border-2 border-green-200'
+                    : 'bg-gray-50 border-2 border-gray-200'
+                "
+              >
+                <div class="text-4xl mb-2">{{ session()!.player2_id ? '👤' : '⏳' }}</div>
+                <p
+                  class="font-semibold"
+                  [class]="session()!.player2_id ? 'text-green-800' : 'text-gray-600'"
+                  data-testid="player2-name"
+                >
+                  {{ player2Name() }}
+                </p>
+                <p
+                  class="text-sm"
+                  [class]="session()!.player2_id ? 'text-green-600' : 'text-gray-500'"
+                  data-testid="player2-status"
+                >
+                  {{ session()!.player2_id ? 'Ready' : 'Waiting to join...' }}
+                </p>
+              </div>
+            </div>
 
             <!-- Game Info -->
             <div class="border-t border-gray-200 pt-6 mt-6">
@@ -185,6 +202,7 @@ export class SessionLobby implements OnInit, OnDestroy {
   codeCopied = signal(false);
   errorMessage = signal('');
   currentUserName = signal('Player 1');
+  player2Name = signal('Player 2');
 
   private sessionId: string | null = null;
   private subscription: any = null;
