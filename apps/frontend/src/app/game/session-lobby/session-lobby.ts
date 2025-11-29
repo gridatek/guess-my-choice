@@ -23,7 +23,10 @@ import { AuthService } from '../../services/auth.service';
               class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 mb-8 text-center"
             >
               <p class="text-sm text-gray-600 mb-2">Share this code with your friend:</p>
-              <div class="text-5xl font-bold font-mono text-purple-700 tracking-widest mb-4">
+              <div
+                class="text-5xl font-bold font-mono text-purple-700 tracking-widest mb-4"
+                data-testid="session-code"
+              >
                 {{ session()!.session_code }}
               </div>
               <button
@@ -90,7 +93,7 @@ import { AuthService } from '../../services/auth.service';
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p class="text-gray-600">Session Type</p>
-                  <p class="font-semibold text-gray-800">
+                  <p class="font-semibold text-gray-800" data-testid="session-type-badge">
                     {{ session()!.session_type | uppercase }}
                   </p>
                 </div>
