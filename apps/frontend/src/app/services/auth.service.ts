@@ -85,7 +85,7 @@ export class AuthService {
   async signOut() {
     const { error } = await this.supabase.auth.signOut();
     if (error) throw error;
-    this.router.navigate(['/login']);
+    await this.router.navigate(['/login']);
   }
 
   /**
