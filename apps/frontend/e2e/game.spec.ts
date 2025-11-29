@@ -150,7 +150,7 @@ test.describe('Game Functionality', () => {
     });
 
     test('should show player 2 as waiting', async ({ page }) => {
-      await expect(page.getByText('Player 2')).toBeVisible();
+      await expect(page.getByTestId('player2-name')).toBeVisible();
       await expect(page.getByText('Waiting to join...')).toBeVisible();
     });
 
