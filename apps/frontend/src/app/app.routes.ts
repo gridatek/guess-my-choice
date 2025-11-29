@@ -26,6 +26,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'profile',
+    loadComponent: () => import('./profile/profile').then((m) => m.Profile),
+    canActivate: [authGuard],
+  },
+  {
     path: 'game',
     loadComponent: () => import('./game/game-home/game-home').then((m) => m.GameHome),
     canActivate: [authGuard],
