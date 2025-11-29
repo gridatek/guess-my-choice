@@ -147,7 +147,7 @@ import { AuthService } from '../services/auth.service';
                       (click)="onSubmit($event)"
                       [disabled]="isSaving()"
                       class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                      data-testid="save-button"
+                      data-testid="submit-button"
                     >
                       {{ isSaving() ? 'Saving...' : 'Save Changes' }}
                     </button>
@@ -222,6 +222,11 @@ export class Profile {
       this.successMessage.set('Profile updated successfully');
       this.newPassword = '';
       this.confirmPassword = '';
+
+      // Redirect to dashboard after success
+      setTimeout(() => {
+        this.router.navigate(['/dashboard']);
+      }, 1000);
     }, 1000);
   }
 
