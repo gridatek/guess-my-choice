@@ -132,6 +132,8 @@ export class GameService {
 
       if (!anySession) {
         throw new Error('Session not found');
+      } else if (anySession.player2_id !== null) {
+        throw new Error('Session is full');
       } else {
         throw new Error('Session not found or already started');
       }
