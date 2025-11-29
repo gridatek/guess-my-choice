@@ -131,7 +131,7 @@ export class GameService {
         .single();
 
       if (!anySession) {
-        throw new Error('Invalid session code');
+        throw new Error('Session not found');
       } else {
         throw new Error('Session not found or already started');
       }

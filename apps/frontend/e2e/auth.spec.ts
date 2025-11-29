@@ -9,7 +9,7 @@ test.describe('Authentication', () => {
 
   test.describe('Login', () => {
     test('should display login form', async ({ page }) => {
-      await expect(page).toHaveURL('/login');
+      await expect(page).toHaveURL(/\/login/);
       await expect(page.getByTestId('email-input')).toBeVisible();
       await expect(page.getByTestId('password-input')).toBeVisible();
       await expect(page.getByTestId('submit-button')).toBeVisible();

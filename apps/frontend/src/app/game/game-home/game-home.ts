@@ -217,6 +217,12 @@ export class GameHome {
         session_code: this.joinCode,
       });
 
+      console.log('Join session result:', session);
+
+      if (!session || !session.id) {
+        throw new Error('Failed to join session - no session data returned');
+      }
+
       await this.router.navigate(['/game/lobby', session.id]);
     } catch (error: any) {
       this.errorMessage.set(error.message || 'Failed to join game');

@@ -71,7 +71,7 @@ import { AuthService } from '../../services/auth.service';
                   <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
                     <div class="text-4xl mb-2">👤</div>
                     <p class="font-semibold text-green-800" data-testid="player1-name">
-                      Player 1 (You)
+                      {{ currentUserName() }} (You)
                     </p>
                     <p class="text-sm text-green-600" data-testid="player1-status">Ready</p>
                   </div>
