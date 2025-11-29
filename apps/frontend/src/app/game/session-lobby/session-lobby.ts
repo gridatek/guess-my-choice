@@ -55,17 +55,32 @@ import { AuthService } from '../../services/auth.service';
                   </p>
                 </div>
 
+                <!-- Start Button (disabled while waiting) -->
+                <div class="text-center mb-6">
+                  <button
+                    disabled
+                    class="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold opacity-50 cursor-not-allowed text-lg"
+                    data-testid="start-game-button"
+                  >
+                    Waiting for Player 2...
+                  </button>
+                </div>
+
                 <!-- Player Status -->
                 <div class="grid md:grid-cols-2 gap-4 mb-8">
                   <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
                     <div class="text-4xl mb-2">👤</div>
-                    <p class="font-semibold text-green-800">Player 1 (You)</p>
-                    <p class="text-sm text-green-600">Ready</p>
+                    <p class="font-semibold text-green-800" data-testid="player1-name">
+                      {{ currentUserName() }}
+                    </p>
+                    <p class="text-sm text-green-600" data-testid="player1-status">Ready</p>
                   </div>
                   <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
                     <div class="text-4xl mb-2">⏳</div>
                     <p class="font-semibold text-gray-600">Player 2</p>
-                    <p class="text-sm text-gray-500">Waiting to join...</p>
+                    <p class="text-sm text-gray-500" data-testid="player2-status">
+                      Waiting to join...
+                    </p>
                   </div>
                 </div>
               </div>
@@ -96,14 +111,21 @@ import { AuthService } from '../../services/auth.service';
                   <p class="font-semibold text-gray-800" data-testid="session-type-badge">
                     {{ session()!.session_type | uppercase }}
                   </p>
+                  <span class="hidden" data-testid="session-type-display">{{
+                    session()!.session_type
+                  }}</span>
                 </div>
                 <div>
                   <p class="text-gray-600">Total Rounds</p>
-                  <p class="font-semibold text-gray-800">{{ session()!.max_rounds }}</p>
+                  <p class="font-semibold text-gray-800" data-testid="max-rounds-display">
+                    {{ session()!.max_rounds }}
+                  </p>
                 </div>
                 <div>
                   <p class="text-gray-600">Current Round</p>
-                  <p class="font-semibold text-gray-800">{{ session()!.current_round }}</p>
+                  <p class="font-semibold text-gray-800" data-testid="current-round-display">
+                    {{ session()!.current_round || 1 }}
+                  </p>
                 </div>
                 <div>
                   <p class="text-gray-600">Status</p>
@@ -162,6 +184,7 @@ export class SessionLobby implements OnInit, OnDestroy {
   isStarting = signal(false);
   codeCopied = signal(false);
   errorMessage = signal('');
+  currentUserName = signal('Player 1');
 
   private sessionId: string | null = null;
   private subscription: any = null;
@@ -171,7 +194,17 @@ export class SessionLobby implements OnInit, OnDestroy {
     private router: Router,
     private gameService: GameService,
     private authService: AuthService
-  ) {}
+  ) {
+    this.loadCurrentUser();
+  }
+
+  async loadCurrentUser() {
+    const user = await this.authService.getCurrentUser();
+    if (user?.email) {
+      const name = user.email.split('@')[0];
+      this.currentUserName.set(name);
+    }
+  }
 
   async ngOnInit() {
     this.sessionId = this.route.snapshot.paramMap.get('id');
