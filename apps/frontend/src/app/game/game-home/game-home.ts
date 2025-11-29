@@ -217,7 +217,7 @@ export class GameHome {
         session_code: this.joinCode,
       });
 
-      await this.router.navigate(['/game/play', session.id]);
+      await this.router.navigate(['/game/lobby', session.id]);
     } catch (error: any) {
       this.errorMessage.set(error.message || 'Failed to join game');
       console.error('Join game error:', error);
