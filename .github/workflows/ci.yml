@@ -9,10 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]  # Run tests in 4 parallel jobs
 
     steps:
       - uses: actions/checkout@v5
@@ -326,34 +322,57 @@ jobs:
           echo "Admin config:"
           cat apps/admin/public/config.json
 
-      - name: Run frontend E2E tests (shard ${{ matrix.shard }}/4)
+      - name: Run frontend E2E tests
         shell: bash
         run: |
           echo "=========================================="
-          echo "Running Frontend E2E Tests - Shard ${{ matrix.shard }}/4"
+          echo "Running Frontend E2E Tests (excluding admin tests)"
           echo "=========================================="
           echo ""
           cd apps/frontend
 
-          # Run E2E tests with sharding
-          npx playwright test --shard=${{ matrix.shard }}/4 || E2E_EXIT_CODE=$?
+          # Run frontend E2E tests (exclude admin tests)
+          npx playwright test --grep-invert "Admin Panel" || E2E_EXIT_CODE=$?
 
           echo ""
           echo "=========================================="
-          echo "E2E test shard ${{ matrix.shard }}/4 completed with exit code: ${E2E_EXIT_CODE:-0}"
+          echo "Frontend E2E tests completed with exit code: ${E2E_EXIT_CODE:-0}"
           echo "=========================================="
 
           if [ ! -z "$E2E_EXIT_CODE" ] && [ "$E2E_EXIT_CODE" != "0" ]; then
             echo ""
-            echo "E2E tests failed. Test report available in artifacts."
+            echo "Frontend E2E tests failed. Test report available in artifacts."
             exit $E2E_EXIT_CODE
+          fi
+
+      - name: Run admin E2E tests
+        shell: bash
+        run: |
+          echo "=========================================="
+          echo "Running Admin E2E Tests"
+          echo "=========================================="
+          echo ""
+          cd apps/frontend
+
+          # Run only admin E2E tests
+          npx playwright test admin.spec.ts || ADMIN_E2E_EXIT_CODE=$?
+
+          echo ""
+          echo "=========================================="
+          echo "Admin E2E tests completed with exit code: ${ADMIN_E2E_EXIT_CODE:-0}"
+          echo "=========================================="
+
+          if [ ! -z "$ADMIN_E2E_EXIT_CODE" ] && [ "$ADMIN_E2E_EXIT_CODE" != "0" ]; then
+            echo ""
+            echo "Admin E2E tests failed. Test report available in artifacts."
+            exit $ADMIN_E2E_EXIT_CODE
           fi
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report-${{ matrix.shard }}
+          name: playwright-report
           path: apps/frontend/playwright-report/
           retention-days: 30
           if-no-files-found: ignore
@@ -362,7 +381,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e-test-results-${{ matrix.shard }}
+          name: e2e-test-results
           path: apps/frontend/test-results/
           retention-days: 30
           if-no-files-found: ignore
