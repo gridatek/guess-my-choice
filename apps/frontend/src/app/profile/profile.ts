@@ -95,6 +95,7 @@ import { AuthService } from '../services/auth.service';
                         <input
                           type="password"
                           id="new-password"
+                          name="newPassword"
                           [(ngModel)]="newPassword"
                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           data-testid="password-input"
@@ -111,11 +112,18 @@ import { AuthService } from '../services/auth.service';
                         <input
                           type="password"
                           id="confirm-password"
+                          name="confirmPassword"
                           [(ngModel)]="confirmPassword"
                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           data-testid="confirm-password-input"
                         />
                       </div>
+
+                      @if (passwordMismatch()) {
+                        <p class="text-sm text-red-600" data-testid="password-mismatch">
+                          Passwords do not match
+                        </p>
+                      }
 
                       @if (passwordError()) {
                         <p class="text-sm text-red-600" data-testid="password-error">
@@ -145,7 +153,7 @@ import { AuthService } from '../services/auth.service';
                     <button
                       type="submit"
                       (click)="onSubmit($event)"
-                      [disabled]="isSaving()"
+                      [disabled]="isSaving() || passwordMismatch()"
                       class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                       data-testid="submit-button"
                     >
@@ -182,6 +190,15 @@ export class Profile {
   newPassword = '';
   confirmPassword = '';
 
+  // Method to check password mismatch (called from template)
+  passwordMismatch(): boolean {
+    return (
+      this.newPassword.length > 0 &&
+      this.confirmPassword.length > 0 &&
+      this.newPassword !== this.confirmPassword
+    );
+  }
+
   constructor(
     private authService: AuthService,
     private router: Router
@@ -202,13 +219,16 @@ export class Profile {
     this.successMessage.set('');
     this.passwordError.set('');
 
+    const pwd = this.newPassword;
+    const confirmPwd = this.confirmPassword;
+
     // Validate passwords if attempting to change password
-    if (this.newPassword || this.confirmPassword) {
-      if (this.newPassword !== this.confirmPassword) {
+    if (pwd || confirmPwd) {
+      if (pwd !== confirmPwd) {
         this.passwordError.set('Passwords do not match');
         return;
       }
-      if (this.newPassword.length < 6) {
+      if (pwd.length < 6) {
         this.passwordError.set('Password must be at least 6 characters');
         return;
       }
@@ -218,10 +238,10 @@ export class Profile {
 
     try {
       // Update password if provided
-      if (this.newPassword) {
+      if (pwd) {
         const supabase = this.authService.getSupabaseClient();
         const { data, error } = await supabase.auth.updateUser({
-          password: this.newPassword,
+          password: pwd,
         });
 
         if (error) {
@@ -239,7 +259,7 @@ export class Profile {
       this.isSaving.set(false);
       this.successMessage.set('Profile updated successfully');
 
-      const passwordChanged = !!this.newPassword;
+      const passwordChanged = !!pwd;
       this.newPassword = '';
       this.confirmPassword = '';
 
