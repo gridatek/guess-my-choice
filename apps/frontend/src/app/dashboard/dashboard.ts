@@ -1,11 +1,11 @@
 import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="min-h-screen bg-gray-50">
       <nav class="bg-white shadow-sm">
@@ -17,6 +17,13 @@ import { AuthService } from '../services/auth.service';
               </h1>
             </div>
             <div class="flex items-center space-x-4">
+              <a
+                routerLink="/profile"
+                class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                data-testid="profile-link"
+              >
+                Edit Profile
+              </a>
               <button
                 (click)="onSignOut()"
                 class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
