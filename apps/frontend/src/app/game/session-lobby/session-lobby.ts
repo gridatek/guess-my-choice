@@ -71,7 +71,12 @@ import { AuthService } from '../../services/auth.service';
             @if (session()!.status === 'active') {
               <div class="text-center py-8">
                 <div class="text-6xl mb-4">🎮</div>
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Both Players Ready!</h2>
+                <h2
+                  class="text-2xl font-semibold text-gray-800 mb-4"
+                  data-testid="both-players-ready"
+                >
+                  Both Players Ready!
+                </h2>
                 <p class="text-gray-600 mb-6">Get ready to start the game...</p>
                 <button
                   (click)="startGame()"
@@ -224,6 +229,26 @@ export class SessionLobby implements OnInit, OnDestroy {
     }
   }
 
+  async loadPlayer2Name(player2Id: string) {
+    try {
+      const supabase = this.authService.getSupabaseClient();
+
+      // Try to get email from profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', player2Id)
+        .single();
+
+      if (profile?.email) {
+        const name = profile.email.split('@')[0];
+        this.player2Name.set(name);
+      }
+    } catch (error) {
+      console.error('Failed to load player 2 name:', error);
+    }
+  }
+
   async ngOnInit() {
     this.sessionId = this.route.snapshot.paramMap.get('id');
     if (!this.sessionId) {
@@ -247,6 +272,11 @@ export class SessionLobby implements OnInit, OnDestroy {
       const session = await this.gameService.getSession(this.sessionId!);
       this.session.set(session);
 
+      // Load player 2's name if they've already joined
+      if (session?.player2_id) {
+        await this.loadPlayer2Name(session.player2_id);
+      }
+
       // If session is already active, redirect to game
       if (session?.status === 'active' && session.current_round > 0) {
         await this.router.navigate(['/game/play', this.sessionId]);
@@ -264,6 +294,11 @@ export class SessionLobby implements OnInit, OnDestroy {
       this.sessionId!,
       async (updatedSession) => {
         this.session.set(updatedSession);
+
+        // Load player 2's name if they joined
+        if (updatedSession.player2_id && !this.player2Name().includes('@')) {
+          await this.loadPlayer2Name(updatedSession.player2_id);
+        }
 
         // If session becomes active, show start button
         if (updatedSession.status === 'active' && updatedSession.current_round === 0) {
