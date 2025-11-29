@@ -456,7 +456,7 @@ test.describe('Game Functionality', () => {
 
       // Try to access game routes without auth
       await page.goto('/game');
-      await expect(page).toHaveURL('/dashboard');
+      await expect(page).toHaveURL(/\/login/);
     });
 
     test('should navigate between game states correctly', async ({ page }) => {
