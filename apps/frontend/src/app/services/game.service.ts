@@ -317,6 +317,8 @@ export class GameService {
    */
   subscribeToSession(sessionId: string, callback: (session: GameSession) => void) {
     const supabase = this.authService.getSupabaseClient();
+    console.log('🔌 [SERVICE] Creating realtime channel for session:', sessionId);
+
     return supabase
       .channel(`session:${sessionId}`)
       .on(
@@ -328,10 +330,25 @@ export class GameService {
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
+          console.log('📨 [SERVICE] Raw realtime payload received:', payload);
           callback(payload.new as GameSession);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 [SERVICE] Subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ [SERVICE] Successfully subscribed to realtime updates');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ [SERVICE] Channel error occurred');
+        }
+        if (status === 'TIMED_OUT') {
+          console.error('⏱️ [SERVICE] Subscription timed out');
+        }
+        if (status === 'CLOSED') {
+          console.warn('🔒 [SERVICE] Channel closed');
+        }
+      });
   }
 
   /**

@@ -88,3 +88,6 @@ COMMENT ON TABLE public.game_sessions IS 'Active game sessions between two playe
 COMMENT ON COLUMN public.game_sessions.session_code IS 'Unique 6-character code for joining game';
 COMMENT ON COLUMN public.game_sessions.connection_points IS 'Total points earned - increases when player2 guesses correctly';
 COMMENT ON COLUMN public.game_sessions.current_round IS 'Current round number (0 = not started, 1 = first round)';
+
+-- Enable realtime for game_sessions table
+ALTER PUBLICATION supabase_realtime ADD TABLE game_sessions;

@@ -290,27 +290,42 @@ export class SessionLobby implements OnInit, OnDestroy {
   }
 
   subscribeToSessionUpdates() {
+    console.log('🔌 [LOBBY] Setting up realtime subscription for session:', this.sessionId);
+
     this.subscription = this.gameService.subscribeToSession(
       this.sessionId!,
       async (updatedSession) => {
+        console.log('✅ [LOBBY] 🎉 REALTIME MESSAGE RECEIVED!', {
+          sessionId: updatedSession.id,
+          player1_id: updatedSession.player1_id,
+          player2_id: updatedSession.player2_id,
+          status: updatedSession.status,
+          timestamp: new Date().toISOString(),
+        });
+
         this.session.set(updatedSession);
 
         // Load player 2's name if they joined
         if (updatedSession.player2_id && !this.player2Name().includes('@')) {
+          console.log('👤 [LOBBY] Loading player 2 name for:', updatedSession.player2_id);
           await this.loadPlayer2Name(updatedSession.player2_id);
         }
 
         // If session becomes active, show start button
         if (updatedSession.status === 'active' && updatedSession.current_round === 0) {
+          console.log('🎮 [LOBBY] Both players ready!');
           // Both players joined, ready to start
         }
 
         // If game has started (current_round > 0), navigate to play
         if (updatedSession.status === 'active' && updatedSession.current_round > 0) {
+          console.log('🚀 [LOBBY] Game started, navigating to play...');
           await this.router.navigate(['/game/play', this.sessionId]);
         }
       }
     );
+
+    console.log('✅ [LOBBY] Subscription created');
   }
 
   async startGame() {
