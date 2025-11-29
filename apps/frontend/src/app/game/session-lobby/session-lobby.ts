@@ -53,17 +53,9 @@ import { AuthService } from '../../services/auth.service';
                   <p class="text-gray-600">
                     Share the code above with your friend to start playing!
                   </p>
-                </div>
-
-                <!-- Start Button (disabled while waiting) -->
-                <div class="text-center mb-6">
-                  <button
-                    disabled
-                    class="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold opacity-50 cursor-not-allowed text-lg"
-                    data-testid="start-game-button"
-                  >
-                    Waiting for Player 2...
-                  </button>
+                  <p class="text-sm text-gray-500 mt-4">
+                    Game will start automatically when both players join
+                  </p>
                 </div>
               </div>
             }
@@ -77,15 +69,18 @@ import { AuthService } from '../../services/auth.service';
                 >
                   Both Players Ready!
                 </h2>
-                <p class="text-gray-600 mb-6">Get ready to start the game...</p>
-                <button
-                  (click)="startGame()"
-                  [disabled]="isStarting()"
-                  class="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition text-lg disabled:opacity-50 mb-6"
-                  data-testid="start-game-button"
-                >
-                  {{ isStarting() ? 'Starting...' : 'Start Game' }}
-                </button>
+                <div class="mb-6">
+                  <div class="animate-pulse">
+                    <div class="flex justify-center space-x-2 mb-4">
+                      <div class="w-3 h-3 bg-green-600 rounded-full"></div>
+                      <div class="w-3 h-3 bg-green-600 rounded-full"></div>
+                      <div class="w-3 h-3 bg-green-600 rounded-full"></div>
+                    </div>
+                  </div>
+                  <p class="text-gray-600 font-semibold" data-testid="auto-starting-message">
+                    Starting game automatically...
+                  </p>
+                </div>
               </div>
             }
 
@@ -221,8 +216,8 @@ export class SessionLobby implements OnInit, OnDestroy {
     this.loadCurrentUser();
   }
 
-  async loadCurrentUser() {
-    const user = await this.authService.getCurrentUser();
+  loadCurrentUser() {
+    const user = this.authService.getCurrentUser();
     if (user?.email) {
       const name = user.email.split('@')[0];
       this.currentUserName.set(name);
@@ -277,9 +272,19 @@ export class SessionLobby implements OnInit, OnDestroy {
         await this.loadPlayer2Name(session.player2_id);
       }
 
-      // If session is already active, redirect to game
+      // If game has already started, redirect to game
       if (session?.status === 'active' && session.current_round > 0) {
         await this.router.navigate(['/game/play', this.sessionId]);
+        return;
+      }
+
+      // If both players are ready but game hasn't started, auto-start (only player 1)
+      if (session?.status === 'active' && session.current_round === 0) {
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser?.id === session.player1_id) {
+          console.log('🚀 [LOBBY] Both players ready on load, auto-starting game...');
+          await this.startGame();
+        }
       }
     } catch (error: any) {
       this.errorMessage.set(error.message || 'Failed to load session');
@@ -311,10 +316,18 @@ export class SessionLobby implements OnInit, OnDestroy {
           await this.loadPlayer2Name(updatedSession.player2_id);
         }
 
-        // If session becomes active, show start button
+        // If session becomes active, automatically start the game (only player 1 triggers)
         if (updatedSession.status === 'active' && updatedSession.current_round === 0) {
           console.log('🎮 [LOBBY] Both players ready!');
-          // Both players joined, ready to start
+
+          // Only player 1 should trigger the game start to avoid race conditions
+          const currentUser = this.authService.getCurrentUser();
+          if (currentUser?.id === updatedSession.player1_id) {
+            console.log('🚀 [LOBBY] Auto-starting game as Player 1...');
+            await this.startGame();
+          } else {
+            console.log('⏳ [LOBBY] Waiting for Player 1 to start the game...');
+          }
         }
 
         // If game has started (current_round > 0), navigate to play

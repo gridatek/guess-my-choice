@@ -129,12 +129,14 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       await expect(page.getByTestId('player2-status')).toContainText('Waiting');
     });
 
-    test('Start button is disabled when waiting for player 2', async ({ page }) => {
+    test('Shows auto-start message when waiting for player 2', async ({ page }) => {
       await loginUser(page, 'bob@example.com', 'password123');
       await page.goto('/game');
       await page.getByTestId('create-game-button').click();
 
-      await expect(page.getByTestId('start-game-button')).toBeDisabled();
+      await expect(
+        page.getByText('Game will start automatically when both players join')
+      ).toBeVisible();
     });
 
     test('Cancel button returns to game home', async ({ page }) => {
@@ -238,7 +240,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
   });
 
   test.describe('4. Lobby - Both Players Ready', () => {
-    test('Player 1 sees both players ready after Player 2 joins', async ({ browser }) => {
+    test('Game starts automatically when Player 2 joins', async ({ browser }) => {
       const player1Context = await browser.newContext();
       const player2Context = await browser.newContext();
       const player1Page = await player1Context.newPage();
@@ -250,6 +252,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
         await player1Page.goto('/game');
         await player1Page.getByTestId('create-game-button').click();
         const sessionCode = await getSessionCode(player1Page);
+        const sessionId = player1Page.url().split('/').pop();
 
         // Player 2 joins
         await loginUser(player2Page, 'carol@example.com', 'password123');
@@ -257,19 +260,16 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
         await player2Page.getByTestId('join-code-input').fill(sessionCode);
         await player2Page.getByTestId('join-game-button').click();
 
-        // Player 1 should see both players ready
-        await expect(player1Page.getByTestId('player2-status')).toContainText('Ready', {
-          timeout: 10000,
-        });
-        await expect(player1Page.getByTestId('player2-name')).toContainText('carol');
-        await expect(player1Page.getByTestId('both-players-ready')).toBeVisible();
+        // Both players should automatically navigate to game play
+        await expect(player1Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
+        await expect(player2Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
       } finally {
         await player1Context.close();
         await player2Context.close();
       }
     });
 
-    test('Start button becomes enabled when both players ready', async ({ browser }) => {
+    test('Shows auto-starting message when both players ready', async ({ browser }) => {
       const player1Context = await browser.newContext();
       const player2Context = await browser.newContext();
       const player1Page = await player1Context.newPage();
@@ -281,45 +281,21 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
         await player1Page.getByTestId('create-game-button').click();
         const sessionCode = await getSessionCode(player1Page);
 
-        // Start button should be disabled
-        await expect(player1Page.getByTestId('start-game-button')).toBeDisabled();
-
         // Player 2 joins
         await loginUser(player2Page, 'carol@example.com', 'password123');
         await player2Page.goto('/game');
         await player2Page.getByTestId('join-code-input').fill(sessionCode);
         await player2Page.getByTestId('join-game-button').click();
 
-        // Start button should be enabled
-        await expect(player1Page.getByTestId('start-game-button')).toBeEnabled({ timeout: 10000 });
-      } finally {
-        await player1Context.close();
-        await player2Context.close();
-      }
-    });
+        // Player 1 should see auto-starting message (if realtime triggers fast enough)
+        // or navigate directly to game
+        const hasAutoStartMessage = await player1Page
+          .getByTestId('auto-starting-message')
+          .isVisible()
+          .catch(() => false);
+        const hasNavigated = player1Page.url().includes('/game/play/');
 
-    test('Both players can see each other in lobby', async ({ browser }) => {
-      const player1Context = await browser.newContext();
-      const player2Context = await browser.newContext();
-      const player1Page = await player1Context.newPage();
-      const player2Page = await player2Context.newPage();
-
-      try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-
-        // Player 1 sees Player 2
-        await expect(player1Page.getByTestId('player2-name')).toContainText('carol');
-
-        // Player 2 sees Player 1
-        await expect(player2Page.getByTestId('player1-name')).toContainText('bob');
+        expect(hasAutoStartMessage || hasNavigated).toBeTruthy();
       } finally {
         await player1Context.close();
         await player2Context.close();
@@ -327,8 +303,8 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
     });
   });
 
-  test.describe('5. Starting the Game', () => {
-    test('Player 1 can start the game', async ({ browser }) => {
+  test.describe('5. Auto-start Behavior', () => {
+    test('Game starts automatically for both players', async ({ browser }) => {
       const player1Context = await browser.newContext();
       const player2Context = await browser.newContext();
       const player1Page = await player1Context.newPage();
@@ -339,26 +315,24 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
         await player1Page.goto('/game');
         await player1Page.getByTestId('create-game-button').click();
         const sessionCode = await getSessionCode(player1Page);
+        const sessionId = player1Page.url().split('/').pop();
 
         await loginUser(player2Page, 'carol@example.com', 'password123');
         await player2Page.goto('/game');
         await player2Page.getByTestId('join-code-input').fill(sessionCode);
         await player2Page.getByTestId('join-game-button').click();
 
-        // Player 1 starts
-        await expect(player1Page.getByTestId('start-game-button')).toBeEnabled({ timeout: 10000 });
-        await player1Page.getByTestId('start-game-button').click();
-
-        // Both navigate to play
-        await expect(player1Page).toHaveURL(/\/game\/play\/.+/, { timeout: 10000 });
-        await expect(player2Page).toHaveURL(/\/game\/play\/.+/, { timeout: 10000 });
+        // Both players should automatically navigate to game (no button click needed)
+        await expect(player1Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
+        await expect(player2Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
       } finally {
         await player1Context.close();
         await player2Context.close();
       }
     });
 
-    test('Player 2 cannot start the game', async ({ browser }) => {
+    test.skip('Player 2 cannot start the game', async ({ browser }) => {
+      // This test is no longer relevant since there's no manual start button
       const player1Context = await browser.newContext();
       const player2Context = await browser.newContext();
       const player1Page = await player1Context.newPage();
