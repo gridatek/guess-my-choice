@@ -26,7 +26,7 @@ test.describe('Game Functionality', () => {
       await expect(page.getByTestId('create-game-button')).toBeVisible();
 
       // Join game section
-      await expect(page.getByText('Join Game')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Join Game' })).toBeVisible();
       await expect(page.getByTestId('join-code-input')).toBeVisible();
       await expect(page.getByTestId('join-game-button')).toBeVisible();
 
