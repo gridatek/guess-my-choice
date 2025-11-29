@@ -12,7 +12,9 @@ import { GameService, SessionType } from '../../services/game.service';
       <div class="max-w-4xl mx-auto px-4 py-16">
         <!-- Header -->
         <div class="text-center mb-12">
-          <h1 class="text-5xl font-bold text-white mb-4">Guess My Choice</h1>
+          <h1 class="text-5xl font-bold text-white mb-4" data-testid="game-home-title">
+            Guess My Choice
+          </h1>
           <p class="text-xl text-white/90">Create connections through fun gameplay</p>
         </div>
 
