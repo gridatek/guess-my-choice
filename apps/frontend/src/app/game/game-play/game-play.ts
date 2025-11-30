@@ -10,7 +10,7 @@ import {
 } from '../../services/game.service';
 import { AuthService } from '../../services/auth.service';
 
-type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealing' | 'feedback';
+type GamePhase = 'loading' | 'choosing' | 'waiting' | 'revealing' | 'feedback';
 
 @Component({
   selector: 'app-game-play',
@@ -73,29 +73,35 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
               </div>
             }
 
-            @if (gamePhase() === 'player1_choosing') {
+            @if (gamePhase() === 'choosing') {
               <div>
                 <h3
                   class="text-2xl font-semibold text-center mb-6 text-gray-800"
                   data-testid="turn-message"
                 >
-                  {{
-                    isPlayer1()
-                      ? 'Choose your option (Player 2 will guess)'
-                      : 'Waiting for Player 1 to choose...'
-                  }}
+                  Choose your option
                 </h3>
 
                 <div class="grid md:grid-cols-2 gap-4">
                   @for (option of options(); track option.id) {
                     <button
-                      (click)="selectedChoice.set(option.id)"
-                      [disabled]="!isPlayer1()"
-                      class="p-6 border-2 rounded-xl text-left transition hover:shadow-lg disabled:cursor-not-allowed"
-                      [class.border-purple-600]="selectedChoice() === option.id"
-                      [class.bg-purple-50]="selectedChoice() === option.id"
-                      [class.border-gray-300]="selectedChoice() !== option.id"
-                      [class.hover:border-purple-400]="isPlayer1() && selectedChoice() === null"
+                      (click)="
+                        isPlayer1() ? selectedChoice.set(option.id) : selectedGuess.set(option.id)
+                      "
+                      class="p-6 border-2 rounded-xl text-left transition hover:shadow-lg"
+                      [class.border-purple-600]="
+                        (isPlayer1() && selectedChoice() === option.id) ||
+                        (isPlayer2() && selectedGuess() === option.id)
+                      "
+                      [class.bg-purple-50]="
+                        (isPlayer1() && selectedChoice() === option.id) ||
+                        (isPlayer2() && selectedGuess() === option.id)
+                      "
+                      [class.border-gray-300]="
+                        (isPlayer1() && selectedChoice() !== option.id) ||
+                        (isPlayer2() && selectedGuess() !== option.id)
+                      "
+                      [class.hover:border-purple-400]="true"
                       data-testid="option-button"
                     >
                       <h4 class="font-semibold text-lg text-gray-800 mb-2">
@@ -104,94 +110,47 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
                       @if (option.description) {
                         <p class="text-sm text-gray-600">{{ option.description }}</p>
                       }
-                      @if (selectedChoice() === option.id) {
+                      @if (
+                        (isPlayer1() && selectedChoice() === option.id) ||
+                        (isPlayer2() && selectedGuess() === option.id)
+                      ) {
                         <div class="mt-2 text-purple-600 font-semibold">✓ Selected</div>
                       }
                     </button>
                   }
                 </div>
 
-                @if (isPlayer1() && selectedChoice()) {
+                @if ((isPlayer1() && selectedChoice()) || (isPlayer2() && selectedGuess())) {
                   <div class="mt-6 text-center">
                     <button
-                      (click)="confirmChoice()"
+                      (click)="isPlayer1() ? confirmChoice() : confirmPlayer2Choice()"
                       class="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold text-lg"
-                      data-testid="confirm-choice-button"
+                      [attr.data-testid]="
+                        isPlayer1() ? 'confirm-choice-button' : 'confirm-guess-button'
+                      "
                     >
                       Confirm Choice
                     </button>
                   </div>
                 }
-
-                @if (!isPlayer1()) {
-                  <div class="mt-6 text-center">
-                    <div class="animate-pulse inline-flex space-x-2">
-                      <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
-                      <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
-                      <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
-                    </div>
-                  </div>
-                }
               </div>
             }
 
-            @if (gamePhase() === 'player2_guessing') {
-              <div>
-                <h3
-                  class="text-2xl font-semibold text-center mb-6 text-gray-800"
-                  data-testid="turn-message"
-                >
-                  {{
-                    isPlayer1() ? 'Waiting for Player 2 to guess...' : 'What did Player 1 choose?'
-                  }}
+            @if (gamePhase() === 'waiting') {
+              <div class="text-center py-12">
+                <div class="text-6xl mb-6">⏳</div>
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4" data-testid="turn-message">
+                  Waiting for other player...
                 </h3>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                  @for (option of options(); track option.id) {
-                    <button
-                      (click)="selectedGuess.set(option.id)"
-                      [disabled]="!isPlayer2()"
-                      class="p-6 border-2 rounded-xl text-left transition hover:shadow-lg disabled:cursor-not-allowed"
-                      [class.border-pink-600]="selectedGuess() === option.id"
-                      [class.bg-pink-50]="selectedGuess() === option.id"
-                      [class.border-gray-300]="selectedGuess() !== option.id"
-                      [class.hover:border-pink-400]="isPlayer2() && selectedGuess() === null"
-                      data-testid="option-button"
-                    >
-                      <h4 class="font-semibold text-lg text-gray-800 mb-2">
-                        {{ option.option_text }}
-                      </h4>
-                      @if (option.description) {
-                        <p class="text-sm text-gray-600">{{ option.description }}</p>
-                      }
-                      @if (selectedGuess() === option.id) {
-                        <div class="mt-2 text-pink-600 font-semibold">✓ Your Guess</div>
-                      }
-                    </button>
-                  }
+                <p class="text-gray-600 mb-6">
+                  You've made your choice! Waiting for {{ isPlayer1() ? 'Player 2' : 'Player 1' }}
+                  to choose.
+                </p>
+                <div class="animate-pulse inline-flex space-x-2">
+                  <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                  <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
+                  <div class="w-3 h-3 bg-purple-600 rounded-full"></div>
                 </div>
-
-                @if (isPlayer2() && selectedGuess()) {
-                  <div class="mt-6 text-center">
-                    <button
-                      (click)="confirmGuess()"
-                      class="px-8 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition font-semibold text-lg"
-                      data-testid="confirm-guess-button"
-                    >
-                      Confirm Guess
-                    </button>
-                  </div>
-                }
-
-                @if (!isPlayer2()) {
-                  <div class="mt-6 text-center">
-                    <div class="animate-pulse inline-flex space-x-2">
-                      <div class="w-3 h-3 bg-pink-600 rounded-full"></div>
-                      <div class="w-3 h-3 bg-pink-600 rounded-full"></div>
-                      <div class="w-3 h-3 bg-pink-600 rounded-full"></div>
-                    </div>
-                  </div>
-                }
               </div>
             }
 
@@ -402,15 +361,36 @@ export class GamePlay implements OnInit, OnDestroy {
   }
 
   determineGamePhase(round: GameRound) {
-    if (round.player1_choice && round.player2_guess) {
+    const currentUserId = this.currentUserId;
+    const isPlayer1 = this.isPlayer1();
+
+    // If both have chosen, show results
+    if (round.player1_choice && round.player2_choice) {
       this.gamePhase.set('revealing');
       this.selectedChoice.set(round.player1_choice);
-      this.selectedGuess.set(round.player2_guess);
-    } else if (round.player1_choice && !round.player2_guess) {
-      this.gamePhase.set('player2_guessing');
-      this.selectedChoice.set(round.player1_choice);
-    } else {
-      this.gamePhase.set('player1_choosing');
+      this.selectedGuess.set(round.player2_choice);
+    }
+    // If current player has chosen but other hasn't, show waiting
+    else if (
+      (isPlayer1 && round.player1_choice && !round.player2_choice) ||
+      (!isPlayer1 && round.player2_choice && !round.player1_choice)
+    ) {
+      this.gamePhase.set('waiting');
+      if (isPlayer1) {
+        this.selectedChoice.set(round.player1_choice);
+      } else {
+        this.selectedGuess.set(round.player2_choice);
+      }
+    }
+    // Otherwise, in choosing phase
+    else {
+      this.gamePhase.set('choosing');
+      // Pre-fill if already chosen (in case of refresh)
+      if (isPlayer1 && round.player1_choice) {
+        this.selectedChoice.set(round.player1_choice);
+      } else if (!isPlayer1 && round.player2_choice) {
+        this.selectedGuess.set(round.player2_choice);
+      }
     }
   }
 
@@ -449,23 +429,25 @@ export class GamePlay implements OnInit, OnDestroy {
       if (!round || !this.isPlayer1() || !optionId) return;
 
       await this.gameService.submitChoice(round.id, optionId);
-      this.gamePhase.set('player2_guessing');
+
+      // After submitting, move to waiting phase until Player 2 also chooses
+      this.gamePhase.set('waiting');
     } catch (error: any) {
       this.errorMessage.set(error.message || 'Failed to submit choice');
       console.error('Submit choice error:', error);
     }
   }
 
-  async confirmGuess() {
+  async confirmPlayer2Choice() {
     try {
       const round = this.currentRound();
       const optionId = this.selectedGuess();
       if (!round || !this.isPlayer2() || !optionId) return;
 
-      await this.gameService.submitGuess(round.id, optionId);
+      await this.gameService.submitPlayer2Choice(round.id, optionId);
 
       // The database trigger will automatically:
-      // - Calculate is_correct
+      // - Calculate is_correct (if both chose same option)
       // - Set points_earned
       // - Update session connection_points
       // - Set completed_at
@@ -473,11 +455,19 @@ export class GamePlay implements OnInit, OnDestroy {
       // Wait a moment for the trigger to process
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      this.gamePhase.set('revealing');
+      // After submitting, move to waiting phase until Player 1 also chooses
+      this.gamePhase.set('waiting');
     } catch (error: any) {
-      this.errorMessage.set(error.message || 'Failed to submit guess');
-      console.error('Submit guess error:', error);
+      this.errorMessage.set(error.message || 'Failed to submit choice');
+      console.error('Submit choice error:', error);
     }
+  }
+
+  /**
+   * @deprecated Use confirmPlayer2Choice instead
+   */
+  async confirmGuess() {
+    return this.confirmPlayer2Choice();
   }
 
   getChosenOption(): GameOption | null {

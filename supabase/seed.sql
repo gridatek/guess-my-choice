@@ -322,7 +322,7 @@ INSERT INTO public.game_rounds (
     round_number,
     selected_options,
     player1_choice,
-    player2_guess,
+    player2_choice,
     is_correct,
     points_earned,
     completed_at
@@ -338,7 +338,7 @@ INSERT INTO public.game_rounds (
             '00000004-0000-0000-0000-000000000004'::uuid
         ],
         '00000002-0000-0000-0000-000000000002'::uuid, -- Bob chose "Watch a movie"
-        '00000002-0000-0000-0000-000000000002'::uuid, -- Carol guessed "Watch a movie"
+        '00000002-0000-0000-0000-000000000002'::uuid, -- Carol chose "Watch a movie"
         true,
         10,
         NOW() - INTERVAL '8 minutes'
@@ -354,7 +354,7 @@ INSERT INTO public.game_rounds (
             '00000008-0000-0000-0000-000000000008'::uuid
         ],
         '00000005-0000-0000-0000-000000000005'::uuid, -- Bob chose "Try a new restaurant"
-        '00000005-0000-0000-0000-000000000005'::uuid, -- Carol guessed correctly
+        '00000005-0000-0000-0000-000000000005'::uuid, -- Carol chose "Try a new restaurant"
         true,
         10,
         NOW() - INTERVAL '5 minutes'

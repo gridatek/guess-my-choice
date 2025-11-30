@@ -27,8 +27,8 @@ export interface GameRound {
   selected_options: string[]; // Array of option UUIDs
   question_id: string | null; // Optional question that frames the round
   player1_choice: string | null;
-  player2_guess: string | null;
-  is_correct: boolean | null;
+  player2_choice: string | null; // Renamed from player2_guess for simultaneous gameplay
+  is_correct: boolean | null; // Whether both players chose the same option
   points_earned: number;
   player1_feedback: string | null;
   player2_feedback: string | null;
@@ -274,16 +274,23 @@ export class GameService {
   }
 
   /**
-   * Player 2 submits their guess
+   * Player 2 submits their choice (simultaneous with Player 1)
    */
-  async submitGuess(roundId: string, guessId: string): Promise<void> {
+  async submitPlayer2Choice(roundId: string, choiceId: string): Promise<void> {
     const supabase = this.authService.getSupabaseClient();
     const { error } = await supabase
       .from('game_rounds')
-      .update({ player2_guess: guessId })
+      .update({ player2_choice: choiceId })
       .eq('id', roundId);
 
     if (error) throw error;
+  }
+
+  /**
+   * @deprecated Use submitPlayer2Choice instead
+   */
+  async submitGuess(roundId: string, guessId: string): Promise<void> {
+    return this.submitPlayer2Choice(roundId, guessId);
   }
 
   /**
