@@ -52,6 +52,10 @@ async function startGameWithBothPlayers(
   // Wait for Player 1 to be on play page
   await expect(player1Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
 
+  // Wait for game UI to be fully loaded on both pages
+  await expect(player1Page.getByTestId('turn-message')).toBeVisible({ timeout: 10000 });
+  await expect(player2Page.getByTestId('turn-message')).toBeVisible({ timeout: 10000 });
+
   return sessionId;
 }
 

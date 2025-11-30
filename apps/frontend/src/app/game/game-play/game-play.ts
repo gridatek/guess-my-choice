@@ -23,14 +23,19 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
           <div class="bg-white rounded-2xl shadow-2xl p-6 mb-6">
             <div class="flex justify-between items-center">
               <div>
-                <h1 class="text-2xl font-bold text-gray-800">
+                <h1 class="text-2xl font-bold text-gray-800" data-testid="round-number">
                   Round {{ session()!.current_round }} / {{ session()!.max_rounds }}
                 </h1>
-                <p class="text-gray-600">{{ getSessionTypeLabel(session()!.session_type) }}</p>
+                <p class="text-gray-600" data-testid="player-role">
+                  {{ getSessionTypeLabel(session()!.session_type) }}
+                  - You are Player {{ isPlayer1() ? '1' : '2' }}
+                </p>
               </div>
               <div class="text-right">
                 <p class="text-sm text-gray-600">Connection Points</p>
-                <p class="text-3xl font-bold text-purple-600">{{ session()!.connection_points }}</p>
+                <p class="text-3xl font-bold text-purple-600" data-testid="connection-points">
+                  {{ session()!.connection_points }}
+                </p>
               </div>
             </div>
 
@@ -70,7 +75,10 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
 
             @if (gamePhase() === 'player1_choosing') {
               <div>
-                <h3 class="text-2xl font-semibold text-center mb-6 text-gray-800">
+                <h3
+                  class="text-2xl font-semibold text-center mb-6 text-gray-800"
+                  data-testid="turn-message"
+                >
                   {{
                     isPlayer1()
                       ? 'Choose your option (Player 2 will guess)'
@@ -81,8 +89,8 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
                 <div class="grid md:grid-cols-2 gap-4">
                   @for (option of options(); track option.id) {
                     <button
-                      (click)="selectChoice(option.id)"
-                      [disabled]="!isPlayer1() || selectedChoice() !== null"
+                      (click)="selectedChoice.set(option.id)"
+                      [disabled]="!isPlayer1()"
                       class="p-6 border-2 rounded-xl text-left transition hover:shadow-lg disabled:cursor-not-allowed"
                       [class.border-purple-600]="selectedChoice() === option.id"
                       [class.bg-purple-50]="selectedChoice() === option.id"
@@ -103,6 +111,18 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
                   }
                 </div>
 
+                @if (isPlayer1() && selectedChoice()) {
+                  <div class="mt-6 text-center">
+                    <button
+                      (click)="confirmChoice()"
+                      class="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold text-lg"
+                      data-testid="confirm-choice-button"
+                    >
+                      Confirm Choice
+                    </button>
+                  </div>
+                }
+
                 @if (!isPlayer1()) {
                   <div class="mt-6 text-center">
                     <div class="animate-pulse inline-flex space-x-2">
@@ -117,7 +137,10 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
 
             @if (gamePhase() === 'player2_guessing') {
               <div>
-                <h3 class="text-2xl font-semibold text-center mb-6 text-gray-800">
+                <h3
+                  class="text-2xl font-semibold text-center mb-6 text-gray-800"
+                  data-testid="turn-message"
+                >
                   {{
                     isPlayer1() ? 'Waiting for Player 2 to guess...' : 'What did Player 1 choose?'
                   }}
@@ -126,14 +149,14 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
                 <div class="grid md:grid-cols-2 gap-4">
                   @for (option of options(); track option.id) {
                     <button
-                      (click)="makeGuess(option.id)"
-                      [disabled]="!isPlayer2() || selectedGuess() !== null"
+                      (click)="selectedGuess.set(option.id)"
+                      [disabled]="!isPlayer2()"
                       class="p-6 border-2 rounded-xl text-left transition hover:shadow-lg disabled:cursor-not-allowed"
                       [class.border-pink-600]="selectedGuess() === option.id"
                       [class.bg-pink-50]="selectedGuess() === option.id"
                       [class.border-gray-300]="selectedGuess() !== option.id"
                       [class.hover:border-pink-400]="isPlayer2() && selectedGuess() === null"
-                      data-testid="guess-button"
+                      data-testid="option-button"
                     >
                       <h4 class="font-semibold text-lg text-gray-800 mb-2">
                         {{ option.option_text }}
@@ -148,6 +171,18 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
                   }
                 </div>
 
+                @if (isPlayer2() && selectedGuess()) {
+                  <div class="mt-6 text-center">
+                    <button
+                      (click)="confirmGuess()"
+                      class="px-8 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition font-semibold text-lg"
+                      data-testid="confirm-guess-button"
+                    >
+                      Confirm Guess
+                    </button>
+                  </div>
+                }
+
                 @if (!isPlayer2()) {
                   <div class="mt-6 text-center">
                     <div class="animate-pulse inline-flex space-x-2">
@@ -161,7 +196,7 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
             }
 
             @if (gamePhase() === 'revealing') {
-              <div class="text-center">
+              <div class="text-center" data-testid="result-overlay">
                 <div class="text-6xl mb-6">
                   {{ isCorrectGuess() ? '🎉' : '😅' }}
                 </div>
@@ -400,12 +435,12 @@ export class GamePlay implements OnInit, OnDestroy {
     }
   }
 
-  async selectChoice(optionId: string) {
+  async confirmChoice() {
     try {
       const round = this.currentRound();
-      if (!round || !this.isPlayer1()) return;
+      const optionId = this.selectedChoice();
+      if (!round || !this.isPlayer1() || !optionId) return;
 
-      this.selectedChoice.set(optionId);
       await this.gameService.submitChoice(round.id, optionId);
       this.gamePhase.set('player2_guessing');
     } catch (error: any) {
@@ -414,12 +449,12 @@ export class GamePlay implements OnInit, OnDestroy {
     }
   }
 
-  async makeGuess(optionId: string) {
+  async confirmGuess() {
     try {
       const round = this.currentRound();
-      if (!round || !this.isPlayer2()) return;
+      const optionId = this.selectedGuess();
+      if (!round || !this.isPlayer2() || !optionId) return;
 
-      this.selectedGuess.set(optionId);
       await this.gameService.submitGuess(round.id, optionId);
 
       // The database trigger will automatically:
