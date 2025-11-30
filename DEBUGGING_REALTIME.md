@@ -535,3 +535,262 @@ This information will help identify the root cause!
 - If **nothing works** → Check for JavaScript errors in console, verify Supabase is running
 
 Good luck debugging! 🔍
+
+---
+
+## Test 8: Manual Game Flow Testing (Without Playwright)
+
+This test helps verify the complete game flow works correctly by manually testing in the browser.
+
+### Prerequisites
+
+1. **Start the development environment:**
+
+   ```bash
+   pnpm run dev
+   ```
+
+   Wait for: "Started supabase local development setup."
+
+2. **Start the frontend app:**
+   ```bash
+   pnpm run frontend:dev
+   ```
+   Wait for: "Local: http://localhost:4200/"
+
+### Complete Game Flow Test
+
+#### Player 1 Setup (Main Browser Window)
+
+1. **Open Chrome** (regular window)
+2. **Go to:** `http://localhost:4200`
+3. **Login:**
+   - Email: `bob@example.com`
+   - Password: `password123`
+4. **Click:** "🎮 Start Playing"
+5. **Click:** "Create New Game" button
+6. **You should see the lobby page with:**
+   - Session code (6 characters)
+   - "Player 1 (You)" shown as Ready
+   - "Player 2" shown as "Waiting to join..."
+   - Message: "Game will start automatically when both players join"
+7. **Note the session code**
+8. **Keep window open and visible**
+
+#### Player 2 Setup (Incognito Window)
+
+9. **Open Incognito window** (Ctrl+Shift+N or Cmd+Shift+N)
+10. **Go to:** `http://localhost:4200`
+11. **Login:**
+    - Email: `carol@example.com`
+    - Password: `password123`
+12. **Click:** "🎮 Start Playing"
+13. **Enter the session code** from step 7
+14. **Click:** "Join Game"
+15. **Player 2 should navigate directly to the play page** showing:
+    - "Waiting for Game to Start..." message
+    - Connection Points: 0
+
+#### Check Player 1's Lobby (Main Window)
+
+16. **Look at Player 1's window** - should now show:
+    - ✅ Player 2 status: "Ready"
+    - ✅ "Both Players Ready!" message
+    - ✅ "Start Game" button is visible
+    - ❌ Player 2 should NOT see the Start Game button (only Player 1)
+
+#### Start the Game (Player 1)
+
+17. **In Player 1's window, click:** "Start Game" button
+18. **Both windows should navigate to the game play page**
+
+#### Verify Game UI Elements (Both Windows)
+
+**Player 1's window should show:**
+
+- ✅ Round indicator: "Round 1 / 3" (or whatever max_rounds is)
+- ✅ Player role: "Friends - Casual & Fun - You are Player 1"
+- ✅ Connection Points: 0
+- ✅ Turn message: "Choose your option (Player 2 will guess)"
+- ✅ 4 option buttons visible
+- ✅ Options are clickable
+
+**Player 2's window should show:**
+
+- ✅ Round indicator: "Round 1 / 3"
+- ✅ Player role: "Friends - Casual & Fun - You are Player 2"
+- ✅ Connection Points: 0
+- ✅ Turn message: "Waiting for Player 1 to choose..."
+- ✅ 4 option buttons visible but grayed out/disabled
+- ✅ Loading animation or waiting indicator
+
+#### Play Round 1
+
+19. **Player 1: Click on any option**
+    - Option should highlight with purple border
+    - "✓ Selected" should appear on the option
+    - "Confirm Choice" button should appear
+
+20. **Player 1: Click "Confirm Choice" button**
+    - Turn message should change to "Waiting for Player 2 to guess..."
+    - Options should be disabled
+
+21. **Player 2's window should update:**
+    - Turn message changes to "What did Player 1 choose?"
+    - 4 options become clickable
+    - Options should have pink styling (different from Player 1)
+
+22. **Player 2: Click on any option**
+    - Option highlights with pink border
+    - "✓ Your Guess" appears
+    - "Confirm Guess" button appears
+
+23. **Player 2: Click "Confirm Guess" button**
+    - Result overlay should appear on both windows
+    - Shows "🎉 Correct Guess!" or "😅 Not Quite!"
+    - Shows what Player 1 chose
+    - Shows points earned (if correct)
+    - "Continue to Next Round" button visible
+
+#### Check Result Overlay
+
+**Both windows should show:**
+
+- ✅ Result overlay visible (data-testid="result-overlay")
+- ✅ Emoji (🎉 or 😅)
+- ✅ "Correct Guess!" or "Not Quite!" heading
+- ✅ "Player 1 chose:" with the actual choice
+- ✅ Connection points updated if guess was correct
+- ✅ "Continue to Next Round" button (or "View Final Results" if last round)
+
+#### Continue to Round 2
+
+24. **Either player can click:** "Continue to Next Round"
+25. **Both windows should:**
+    - Update round indicator to "Round 2 / 3"
+    - Start over with Player 1 choosing
+    - Maintain the same connection points
+
+#### Complete the Game
+
+26. **Play through all rounds** (usually 3)
+27. **After the final round:**
+    - Instead of "Continue to Next Round"
+    - Should show "View Final Results" button
+    - Clicking navigates both players to results page
+
+#### Verify Results Page
+
+28. **Both windows should show:**
+    - Final connection points
+    - Game summary
+    - "Play Again" button
+    - "Back to Dashboard" button
+
+---
+
+### Common Issues to Check
+
+#### Issue: Player 2 doesn't see waiting message
+
+**Expected:** Player 2 should see "Waiting for Game to Start..." when they first join **Check:**
+Look for element with data-testid="turn-message" (only appears when game starts)
+
+#### Issue: Options don't become clickable
+
+**Expected:** Options should be clickable when it's your turn **Check:** Look for disabled attribute
+on buttons, verify game phase is correct
+
+#### Issue: Confirm button doesn't appear
+
+**Expected:** After selecting an option, confirm button should appear **Check:** Verify selection is
+being registered (purple/pink highlight), check for data-testid="confirm-choice-button" or
+"confirm-guess-button"
+
+#### Issue: Result overlay doesn't show
+
+**Expected:** After both players make their move, result should display **Check:** Look for
+data-testid="result-overlay", check browser console for errors
+
+#### Issue: Player 2 sees Start Game button
+
+**Expected:** Only Player 1 should see the "Start Game" button in lobby **Check:** Verify Player 2
+goes directly to play page, not lobby
+
+---
+
+### Browser Console Checks
+
+**Open browser console (F12) on both windows and check for:**
+
+1. **Subscription logs:**
+
+   ```
+   🔌 [LOBBY] Setting up realtime subscription
+   ✅ [LOBBY] Subscription created
+   ✅ [LOBBY] Realtime update received!
+   ```
+
+2. **No errors** related to:
+   - Supabase client
+   - Missing test IDs
+   - Failed API calls
+   - Realtime subscription failures
+
+3. **Game phase transitions:**
+   - loading → player1_choosing → player2_guessing → revealing
+
+---
+
+### Checklist: Manual Testing
+
+Use this checklist while testing:
+
+- [ ] Player 1 can create a game and see lobby
+- [ ] Player 2 can join with session code
+- [ ] Player 2 goes directly to play page (not lobby)
+- [ ] Player 1 sees "Both Players Ready!" in lobby
+- [ ] Only Player 1 sees "Start Game" button
+- [ ] Player 2 sees "Waiting for Player 1 to start..." on play page
+- [ ] Player 1 can click "Start Game" and both navigate to play page
+- [ ] Both players see correct round number and connection points
+- [ ] Both players see correct "You are Player X" text
+- [ ] Player 1 sees "Choose your option" message
+- [ ] Player 2 sees "Waiting for Player 1" message
+- [ ] Player 1 can select an option (highlights purple)
+- [ ] "Confirm Choice" button appears for Player 1
+- [ ] Player 1 can click "Confirm Choice"
+- [ ] Player 2's turn message updates to "What did Player 1 choose?"
+- [ ] Player 2 can select an option (highlights pink)
+- [ ] "Confirm Guess" button appears for Player 2
+- [ ] Player 2 can click "Confirm Guess"
+- [ ] Result overlay appears on both screens
+- [ ] Connection points update correctly
+- [ ] Can continue to next round
+- [ ] After final round, shows "View Final Results"
+- [ ] Results page displays correctly
+
+---
+
+### Debugging Tips
+
+1. **If elements don't appear:**
+   - Check browser console for errors
+   - Verify element has the correct data-testid
+   - Check if the game phase is correct
+
+2. **If realtime updates fail:**
+   - Check that both browser windows are logged in
+   - Verify Supabase is running
+   - Check console for subscription errors
+
+3. **If game flow breaks:**
+   - Note at which step it breaks
+   - Check the last successful action
+   - Look for JavaScript errors in console
+   - Verify database records in Supabase Studio
+
+4. **To reset and try again:**
+   - Close both browser windows
+   - Start fresh from step 1
+   - Use different session codes each time
