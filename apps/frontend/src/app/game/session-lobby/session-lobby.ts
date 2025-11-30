@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameService, GameSession } from '../../services/game.service';
@@ -60,7 +60,7 @@ import { AuthService } from '../../services/auth.service';
               </div>
             }
 
-            @if (session()!.status === 'active' && !isStarting()) {
+            @if (session()!.status === 'active' && !isStarting() && isPlayer1()) {
               <div class="text-center py-8">
                 <div class="text-6xl mb-4">🎮</div>
                 <h2
@@ -76,6 +76,19 @@ import { AuthService } from '../../services/auth.service';
                 >
                   Start Game
                 </button>
+              </div>
+            }
+
+            @if (session()!.status === 'active' && !isStarting() && !isPlayer1()) {
+              <div class="text-center py-8">
+                <div class="text-6xl mb-4">⏳</div>
+                <h2
+                  class="text-2xl font-semibold text-gray-800 mb-4"
+                  data-testid="both-players-ready"
+                >
+                  Both Players Ready!
+                </h2>
+                <p class="text-gray-600">Waiting for Player 1 to start the game...</p>
               </div>
             }
 
@@ -220,6 +233,11 @@ export class SessionLobby implements OnInit, OnDestroy {
 
   private sessionId: string | null = null;
   private subscription: any = null;
+
+  isPlayer1 = computed(() => {
+    const currentUser = this.authService.getCurrentUser();
+    return currentUser?.id === this.session()?.player1_id;
+  });
 
   constructor(
     private route: ActivatedRoute,
