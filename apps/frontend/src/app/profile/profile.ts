@@ -95,9 +95,9 @@ import { AuthService } from '../services/auth.service';
                         <input
                           type="password"
                           id="new-password"
-                          name="newPassword"
+                          formControlName="newPassword"
                           autocomplete="new-password"
-                          [(ngModel)]="newPassword"
+                          minlength="6"
                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           data-testid="password-input"
                         />
@@ -113,9 +113,9 @@ import { AuthService } from '../services/auth.service';
                         <input
                           type="password"
                           id="confirm-password"
-                          name="confirmPassword"
+                          formControlName="confirmPassword"
                           autocomplete="new-password"
-                          [(ngModel)]="confirmPassword"
+                          minlength="6"
                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           data-testid="confirm-password-input"
                         />
@@ -165,6 +165,7 @@ import { AuthService } from '../services/auth.service';
                       type="button"
                       (click)="goBack()"
                       class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      data-testid="cancel-button"
                     >
                       Cancel
                     </button>
@@ -224,8 +225,8 @@ export class Profile {
     this.successMessage.set('');
     this.passwordError.set('');
 
-    const pwd = this.newPassword;
-    const confirmPwd = this.confirmPassword;
+    const pwd = this.profileForm.get('newPassword')?.value || '';
+    const confirmPwd = this.profileForm.get('confirmPassword')?.value || '';
 
     // Validate passwords if attempting to change password
     if (pwd || confirmPwd) {
@@ -265,8 +266,10 @@ export class Profile {
       this.successMessage.set('Profile updated successfully');
 
       const passwordChanged = !!pwd;
-      this.newPassword = '';
-      this.confirmPassword = '';
+      this.profileForm.patchValue({
+        newPassword: '',
+        confirmPassword: '',
+      });
 
       // Redirect to dashboard after success
       // Wait a bit longer if password was changed to ensure it's persisted
