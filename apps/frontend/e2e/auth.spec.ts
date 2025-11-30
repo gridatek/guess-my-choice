@@ -204,7 +204,14 @@ test.describe('Authentication', () => {
       // Wait for redirect to dashboard
       await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
 
-      // Clear auth state (simulates signout)
+      // NOTE: We manually clear auth state instead of clicking the signout button
+      // to avoid flaky navigation issues. The signout button navigation had
+      // race conditions where the router navigation wouldn't consistently complete
+      // before the test continued. Manually clearing cookies and localStorage
+      // provides a deterministic way to test the auth guard protection without
+      // depending on the UI signout flow, which should be tested separately.
+      // This approach is recommended by Playwright best practices for testing
+      // auth-protected routes.
       await context.clearCookies();
       await page.evaluate(() => localStorage.clear());
 
