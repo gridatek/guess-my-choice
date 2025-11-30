@@ -140,7 +140,7 @@ test.describe('Game Functionality', () => {
       // The session code should be a 6-character string
       const codeElement = page.locator('div.font-mono.text-purple-700');
       await expect(codeElement).toBeVisible();
-      const code = await codeElement.textContent();
+      const code = (await codeElement.textContent())?.trim() || '';
       expect(code).toHaveLength(6);
     });
 
@@ -405,7 +405,7 @@ test.describe('Game Functionality', () => {
         // Get session code
         const codeElement = player1Page.locator('div.font-mono.text-purple-700');
         await expect(codeElement).toBeVisible();
-        const sessionCode = await codeElement.textContent();
+        const sessionCode = (await codeElement.textContent())?.trim() || '';
 
         expect(sessionCode).toHaveLength(6);
 
