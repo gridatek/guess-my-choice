@@ -421,8 +421,15 @@ export class GamePlay implements OnInit, OnDestroy {
     if (session) {
       this.sessionSubscription = this.gameService.subscribeToSession(
         session.id,
-        (updatedSession) => {
+        async (updatedSession) => {
+          const previousRound = this.session()?.current_round || 0;
           this.session.set(updatedSession);
+
+          // If current_round changed (e.g., from 0 to 1 when game starts), reload the round
+          if (updatedSession.current_round !== previousRound && updatedSession.current_round > 0) {
+            console.log('🎮 [GAME-PLAY] Round changed, reloading current round...');
+            await this.loadCurrentRound();
+          }
         }
       );
     }
