@@ -151,7 +151,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       await page.getByTestId('create-game-button').click();
 
       await expect(page.getByTestId('player1-status')).toContainText('Ready');
-      await expect(page.getByTestId('player1-name')).toContainText('bob');
+      await expect(page.getByTestId('player1-name')).toContainText('Player 1 (You)');
     });
 
     test('Shows player 2 as waiting', async ({ page }) => {
@@ -219,8 +219,8 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
         await expect(player2Page.getByTestId('join-game-button')).toBeEnabled();
         await player2Page.getByTestId('join-game-button').click();
 
-        // Player 2 should be in lobby
-        await expect(player2Page).toHaveURL(/\/game\/lobby\/.+/, { timeout: 10000 });
+        // Player 2 should go directly to play page (waiting for game to start)
+        await expect(player2Page).toHaveURL(/\/game\/play\/.+/, { timeout: 10000 });
       } finally {
         await player1Context.close();
         await player2Context.close();
@@ -431,17 +431,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
-        await expect(player2Page).toHaveURL(/\/game\/play\/.+/);
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Player 2 should see waiting message
         await expect(player2Page.getByTestId('turn-message')).toContainText('Waiting for Player 1');
@@ -458,16 +448,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Should show 4 options
         const options = player1Page.getByTestId('option-button');
@@ -485,16 +466,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Select first option
         const firstOption = player1Page.getByTestId('option-button').first();
@@ -518,16 +490,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Player 1 selects and confirms
         await player1Page.getByTestId('option-button').first().click();
@@ -555,15 +518,25 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       try {
         await loginUser(player1Page, 'bob@example.com', 'password123');
         await player1Page.goto('/game');
-        await page.getByTestId('max-rounds-select').selectOption('5');
+        await player1Page.getByTestId('max-rounds-select').selectOption('5');
         await player1Page.getByTestId('create-game-button').click();
         const sessionCode = await getSessionCode(player1Page);
+        const sessionId = player1Page.url().split('/').pop()!;
 
         await loginUser(player2Page, 'carol@example.com', 'password123');
         await player2Page.goto('/game');
         await player2Page.getByTestId('join-code-input').fill(sessionCode);
         await player2Page.getByTestId('join-game-button').click();
+
+        // Wait for Player 2 to be on play page
+        await expect(player2Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
+
+        // Player 1 clicks start
+        await expect(player1Page.getByTestId('start-game-button')).toBeVisible({ timeout: 10000 });
         await player1Page.getByTestId('start-game-button').click();
+
+        // Wait for Player 1 to be on play page
+        await expect(player1Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
 
         // Check round display
         await expect(player1Page.getByTestId('round-number')).toContainText('1 / 5');
@@ -581,16 +554,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Initial points should be 0
         await expect(player1Page.getByTestId('connection-points')).toContainText('0');
@@ -610,16 +574,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Player 1 selects first option
         const player1Choice = player1Page.getByTestId('option-button').first();
@@ -658,16 +613,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Player 1 selects
         await player1Page.getByTestId('option-button').first().click();
@@ -693,16 +639,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Complete round 1
         await player1Page.getByTestId('option-button').first().click();
@@ -744,12 +681,22 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
         await player1Page.getByTestId('max-rounds-select').selectOption('1');
         await player1Page.getByTestId('create-game-button').click();
         const sessionCode = await getSessionCode(player1Page);
+        const sessionId = player1Page.url().split('/').pop()!;
 
         await loginUser(player2Page, 'carol@example.com', 'password123');
         await player2Page.goto('/game');
         await player2Page.getByTestId('join-code-input').fill(sessionCode);
         await player2Page.getByTestId('join-game-button').click();
+
+        // Wait for Player 2 to be on play page
+        await expect(player2Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
+
+        // Player 1 clicks start
+        await expect(player1Page.getByTestId('start-game-button')).toBeVisible({ timeout: 10000 });
         await player1Page.getByTestId('start-game-button').click();
+
+        // Wait for Player 1 to be on play page
+        await expect(player1Page).toHaveURL(`/game/play/${sessionId}`, { timeout: 15000 });
 
         // Complete the round
         await player1Page.getByTestId('option-button').first().click();
@@ -982,16 +929,7 @@ test.describe('Complete 2-Player Game Flow - TDD', () => {
       const player2Page = await player2Context.newPage();
 
       try {
-        await loginUser(player1Page, 'bob@example.com', 'password123');
-        await player1Page.goto('/game');
-        await player1Page.getByTestId('create-game-button').click();
-        const sessionCode = await getSessionCode(player1Page);
-
-        await loginUser(player2Page, 'carol@example.com', 'password123');
-        await player2Page.goto('/game');
-        await player2Page.getByTestId('join-code-input').fill(sessionCode);
-        await player2Page.getByTestId('join-game-button').click();
-        await player1Page.getByTestId('start-game-button').click();
+        await startGameWithBothPlayers(player1Page, player2Page);
 
         // Initial points
         await expect(player1Page.getByTestId('connection-points')).toContainText('0');
