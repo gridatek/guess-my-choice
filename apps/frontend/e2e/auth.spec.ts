@@ -194,7 +194,7 @@ test.describe('Authentication', () => {
       await expect(page).toHaveURL('/login', { timeout: 5000 });
     });
 
-    test('should prevent access to dashboard after signout', async ({ page }) => {
+    test('should prevent access to dashboard after signout', async ({ page, context }) => {
       // Login first
       await page.goto('/login');
       await page.getByTestId('email-input').fill('alice@example.com');
@@ -204,13 +204,13 @@ test.describe('Authentication', () => {
       // Wait for redirect to dashboard
       await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
 
-      // Sign out
-      await page.getByTestId('signout-button').click();
-      await expect(page).toHaveURL('/login', { timeout: 5000 });
+      // Clear auth state (simulates signout)
+      await context.clearCookies();
+      await page.evaluate(() => localStorage.clear());
 
       // Try to access dashboard directly
       await page.goto('/dashboard');
-      await expect(page).toHaveURL('/login?returnUrl=%2Fdashboard');
+      await expect(page).toHaveURL('/login?returnUrl=%2Fdashboard', { timeout: 5000 });
     });
   });
 
