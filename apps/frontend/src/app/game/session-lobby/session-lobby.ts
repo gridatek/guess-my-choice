@@ -60,7 +60,7 @@ import { AuthService } from '../../services/auth.service';
               </div>
             }
 
-            @if (session()!.status === 'active') {
+            @if (session()!.status === 'active' && !isStarting()) {
               <div class="text-center py-8">
                 <div class="text-6xl mb-4">🎮</div>
                 <h2
@@ -69,6 +69,20 @@ import { AuthService } from '../../services/auth.service';
                 >
                   Both Players Ready!
                 </h2>
+                <button
+                  (click)="startGame()"
+                  class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-lg"
+                  data-testid="start-game-button"
+                >
+                  Start Game
+                </button>
+              </div>
+            }
+
+            @if (isStarting()) {
+              <div class="text-center py-8">
+                <div class="text-6xl mb-4">🎮</div>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Both Players Ready!</h2>
                 <div class="mb-6">
                   <div class="animate-pulse">
                     <div class="flex justify-center space-x-2 mb-4">
@@ -78,7 +92,7 @@ import { AuthService } from '../../services/auth.service';
                     </div>
                   </div>
                   <p class="text-gray-600 font-semibold" data-testid="auto-starting-message">
-                    Starting game automatically...
+                    Starting game...
                   </p>
                 </div>
               </div>
@@ -89,7 +103,7 @@ import { AuthService } from '../../services/auth.service';
               <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
                 <div class="text-4xl mb-2">👤</div>
                 <p class="font-semibold text-green-800" data-testid="player1-name">
-                  {{ currentUserName() }} (You)
+                  Player 1 (You)
                 </p>
                 <p class="text-sm text-green-600" data-testid="player1-status">Ready</p>
               </div>
@@ -277,15 +291,6 @@ export class SessionLobby implements OnInit, OnDestroy {
         await this.router.navigate(['/game/play', this.sessionId]);
         return;
       }
-
-      // If both players are ready but game hasn't started, auto-start (only player 1)
-      if (session?.status === 'active' && session.current_round === 0) {
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser?.id === session.player1_id) {
-          console.log('🚀 [LOBBY] Both players ready on load, auto-starting game...');
-          await this.startGame();
-        }
-      }
     } catch (error: any) {
       this.errorMessage.set(error.message || 'Failed to load session');
       console.error('Load session error:', error);
@@ -314,20 +319,6 @@ export class SessionLobby implements OnInit, OnDestroy {
         if (updatedSession.player2_id && !this.player2Name().includes('@')) {
           console.log('👤 [LOBBY] Loading player 2 name for:', updatedSession.player2_id);
           await this.loadPlayer2Name(updatedSession.player2_id);
-        }
-
-        // If session becomes active, automatically start the game (only player 1 triggers)
-        if (updatedSession.status === 'active' && updatedSession.current_round === 0) {
-          console.log('🎮 [LOBBY] Both players ready!');
-
-          // Only player 1 should trigger the game start to avoid race conditions
-          const currentUser = this.authService.getCurrentUser();
-          if (currentUser?.id === updatedSession.player1_id) {
-            console.log('🚀 [LOBBY] Auto-starting game as Player 1...');
-            await this.startGame();
-          } else {
-            console.log('⏳ [LOBBY] Waiting for Player 1 to start the game...');
-          }
         }
 
         // If game has started (current_round > 0), navigate to play

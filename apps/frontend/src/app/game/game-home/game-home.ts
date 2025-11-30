@@ -223,7 +223,8 @@ export class GameHome {
         throw new Error('Failed to join session - no session data returned');
       }
 
-      await this.router.navigate(['/game/lobby', session.id]);
+      // Player 2 goes directly to play page, waiting for Player 1 to start
+      await this.router.navigate(['/game/play', session.id]);
     } catch (error: any) {
       this.errorMessage.set(error.message || 'Failed to join game');
       console.error('Join game error:', error);

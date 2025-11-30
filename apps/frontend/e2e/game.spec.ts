@@ -453,6 +453,7 @@ test.describe('Game Functionality', () => {
 
     test('should protect game routes with auth guard', async ({ page, context }) => {
       await context.clearCookies();
+      await page.evaluate(() => localStorage.clear());
 
       // Try to access game routes without auth
       await page.goto('/game');

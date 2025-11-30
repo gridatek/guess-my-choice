@@ -213,6 +213,17 @@ type GamePhase = 'loading' | 'player1_choosing' | 'player2_guessing' | 'revealin
               <p>{{ errorMessage() }}</p>
             </div>
           }
+        } @else if (session() && !currentRound()) {
+          <!-- Waiting for game to start -->
+          <div class="bg-white rounded-2xl shadow-2xl p-12 text-center">
+            <div class="text-6xl mb-4">⏳</div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Waiting for Game to Start...</h2>
+            <p class="text-gray-600">Player 1 is preparing the game. Get ready to play!</p>
+            <div class="mt-6">
+              <p class="text-sm text-gray-600">Connection Points</p>
+              <p class="text-3xl font-bold text-purple-600">{{ session()!.connection_points }}</p>
+            </div>
+          </div>
         } @else if (isLoadingSession()) {
           <div class="bg-white rounded-2xl shadow-2xl p-12 text-center">
             <div
